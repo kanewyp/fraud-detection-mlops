@@ -1,0 +1,56 @@
+[2025-07-30T03:01:31.146+0000] {local_task_job_runner.py:123} INFO - ::group::Pre task execution logs
+[2025-07-30T03:01:31.164+0000] {taskinstance.py:2614} INFO - Dependencies all met for dep_context=non-requeueable deps ti=<TaskInstance: fraud_detection_training.execute_training manual__2025-07-30T03:01:29.815911+00:00 [queued]>
+[2025-07-30T03:01:31.171+0000] {taskinstance.py:2614} INFO - Dependencies all met for dep_context=requeueable deps ti=<TaskInstance: fraud_detection_training.execute_training manual__2025-07-30T03:01:29.815911+00:00 [queued]>
+[2025-07-30T03:01:31.171+0000] {taskinstance.py:2867} INFO - Starting attempt 1 of 1
+[2025-07-30T03:01:31.181+0000] {taskinstance.py:2890} INFO - Executing <Task(PythonOperator): execute_training> on 2025-07-30 03:01:29.815911+00:00
+[2025-07-30T03:01:31.186+0000] {warnings.py:112} WARNING - /home/***/.local/lib/python3.12/site-packages/***/task/task_runner/standard_task_runner.py:70: DeprecationWarning: This process (pid=419) is multi-threaded, use of fork() may lead to deadlocks in the child.
+  pid = os.fork()
+
+[2025-07-30T03:01:31.188+0000] {standard_task_runner.py:72} INFO - Started process 420 to run task
+[2025-07-30T03:01:31.188+0000] {standard_task_runner.py:104} INFO - Running: ['***', 'tasks', 'run', 'fraud_detection_training', 'execute_training', 'manual__2025-07-30T03:01:29.815911+00:00', '--job-id', '87', '--raw', '--subdir', 'DAGS_FOLDER/fraud_detection_training_dag.py', '--cfg-path', '/tmp/tmpjgdziivj']
+[2025-07-30T03:01:31.189+0000] {standard_task_runner.py:105} INFO - Job 87: Subtask execute_training
+[2025-07-30T03:01:31.227+0000] {task_command.py:467} INFO - Running <TaskInstance: fraud_detection_training.execute_training manual__2025-07-30T03:01:29.815911+00:00 [running]> on host 75f9886374a6
+[2025-07-30T03:01:31.292+0000] {taskinstance.py:3134} INFO - Exporting env vars: AIRFLOW_CTX_DAG_OWNER='kanewyp' AIRFLOW_CTX_DAG_ID='fraud_detection_training' AIRFLOW_CTX_TASK_ID='execute_training' AIRFLOW_CTX_EXECUTION_DATE='2025-07-30T03:01:29.815911+00:00' AIRFLOW_CTX_TRY_NUMBER='1' AIRFLOW_CTX_DAG_RUN_ID='manual__2025-07-30T03:01:29.815911+00:00'
+[2025-07-30T03:01:31.293+0000] {taskinstance.py:732} INFO - ::endgroup::
+[2025-07-30T03:01:34.518+0000] {fraud_detection_training_dag.py:22} INFO - Initializing Fraud Detection Training
+[2025-07-30T03:01:34.525+0000] {fraud_detection_training.py:62} INFO - Configuration loaded successfully
+[2025-07-30T03:01:34.985+0000] {fraud_detection_training.py:88} INFO - Connected to MinIO. Available buckets: mlflow
+[2025-07-30T03:01:35.107+0000] {fraud_detection_training.py:182} INFO - Starting model training process...
+[2025-07-30T03:01:35.108+0000] {fraud_detection_training.py:104} INFO - Reading data from Kafka topic: transactions
+[2025-07-30T03:01:35.247+0000] {conn.py:396} INFO - <BrokerConnection client_id=kafka-python-2.2.15, node_id=bootstrap-0 host=pkc-ldvj1.ap-southeast-2.aws.confluent.cloud:9092 <connecting> [IPv4 ('52.64.27.176', 9092)]>: connecting to pkc-ldvj1.ap-southeast-2.aws.confluent.cloud:9092 [('52.64.27.176', 9092) IPv4]
+[2025-07-30T03:01:35.292+0000] {conn.py:497} INFO - <BrokerConnection client_id=kafka-python-2.2.15, node_id=bootstrap-0 host=pkc-ldvj1.ap-southeast-2.aws.confluent.cloud:9092 <handshake> [IPv4 ('52.64.27.176', 9092)]>: Loading system default SSL CAs from ('/usr/lib/ssl/cert.pem', '/usr/lib/ssl/certs', 'SSL_CERT_FILE', '/usr/lib/ssl/cert.pem', 'SSL_CERT_DIR', '/usr/lib/ssl/certs')
+[2025-07-30T03:01:35.481+0000] {conn.py:618} INFO - <BrokerConnection client_id=kafka-python-2.2.15, node_id=bootstrap-0 host=pkc-ldvj1.ap-southeast-2.aws.confluent.cloud:9092 <checking_api_versions_recv> [IPv4 ('52.64.27.176', 9092)]>: Broker version identified as 2.6
+[2025-07-30T03:01:35.682+0000] {conn.py:822} INFO - <BrokerConnection client_id=kafka-python-2.2.15, node_id=bootstrap-0 host=pkc-ldvj1.ap-southeast-2.aws.confluent.cloud:9092 <authenticating> [IPv4 ('52.64.27.176', 9092)]>: Authenticated as KQIWVOLDBVJZDLTP via SASL / Plain
+[2025-07-30T03:01:35.683+0000] {conn.py:467} INFO - <BrokerConnection client_id=kafka-python-2.2.15, node_id=bootstrap-0 host=pkc-ldvj1.ap-southeast-2.aws.confluent.cloud:9092 <connected> [IPv4 ('52.64.27.176', 9092)]>: Connection complete.
+[2025-07-30T03:01:35.685+0000] {consumer.py:120} WARNING - group_id is None: disabling auto-commit.
+[2025-07-30T03:01:35.685+0000] {subscription_state.py:181} INFO - Updating subscribed topics to: ('transactions',)
+[2025-07-30T03:01:35.751+0000] {subscription_state.py:254} INFO - Updated partition assignment: [('transactions', 0)]
+[2025-07-30T03:01:35.827+0000] {conn.py:396} INFO - <BrokerConnection client_id=kafka-python-2.2.15, node_id=0 host=b0-pkc-ldvj1.ap-southeast-2.aws.confluent.cloud:9092 <connecting> [IPv4 ('13.236.79.131', 9092)]>: connecting to b0-pkc-ldvj1.ap-southeast-2.aws.confluent.cloud:9092 [('13.236.79.131', 9092) IPv4]
+[2025-07-30T03:01:35.868+0000] {conn.py:497} INFO - <BrokerConnection client_id=kafka-python-2.2.15, node_id=0 host=b0-pkc-ldvj1.ap-southeast-2.aws.confluent.cloud:9092 <handshake> [IPv4 ('13.236.79.131', 9092)]>: Loading system default SSL CAs from ('/usr/lib/ssl/cert.pem', '/usr/lib/ssl/certs', 'SSL_CERT_FILE', '/usr/lib/ssl/cert.pem', 'SSL_CERT_DIR', '/usr/lib/ssl/certs')
+[2025-07-30T03:01:36.212+0000] {conn.py:822} INFO - <BrokerConnection client_id=kafka-python-2.2.15, node_id=0 host=b0-pkc-ldvj1.ap-southeast-2.aws.confluent.cloud:9092 <authenticating> [IPv4 ('13.236.79.131', 9092)]>: Authenticated as KQIWVOLDBVJZDLTP via SASL / Plain
+[2025-07-30T03:01:36.213+0000] {conn.py:467} INFO - <BrokerConnection client_id=kafka-python-2.2.15, node_id=0 host=b0-pkc-ldvj1.ap-southeast-2.aws.confluent.cloud:9092 <connected> [IPv4 ('13.236.79.131', 9092)]>: Connection complete.
+[2025-07-30T03:01:36.214+0000] {conn.py:945} INFO - <BrokerConnection client_id=kafka-python-2.2.15, node_id=bootstrap-0 host=pkc-ldvj1.ap-southeast-2.aws.confluent.cloud:9092 <connected> [IPv4 ('52.64.27.176', 9092)]>: Closing connection. 
+[2025-07-30T03:01:36.273+0000] {fetcher.py:418} INFO - Resetting offset for partition ('transactions', 0) to offset 0.
+[2025-07-30T03:01:51.200+0000] {conn.py:945} INFO - <BrokerConnection client_id=kafka-python-2.2.15, node_id=0 host=b0-pkc-ldvj1.ap-southeast-2.aws.confluent.cloud:9092 <connected> [IPv4 ('13.236.79.131', 9092)]>: Closing connection. 
+[2025-07-30T03:01:51.202+0000] {fetcher.py:786} INFO - Fetch to node 0 failed: Cancelled: <BrokerConnection client_id=kafka-python-2.2.15, node_id=0 host=b0-pkc-ldvj1.ap-southeast-2.aws.confluent.cloud:9092 <connected> [IPv4 ('13.236.79.131', 9092)]>
+[2025-07-30T03:01:51.439+0000] {fraud_detection_training.py:131} INFO - Received 57990 records from Kafka with fraud rate: 0.79%
+[2025-07-30T03:01:59.551+0000] {fraud_detection_training.py:261} INFO - Starting hyperparameter tuning...
+[2025-07-30T03:10:02.690+0000] {fraud_detection_training.py:265} INFO - Best hyperparameters found: {'classifier__subsample': 0.6, 'classifier__reg_alpha': 0.1, 'classifier__max_depth': 7, 'classifier__learning_rate': 0.01, 'classifier__gamma': 0.1, 'classifier__colsample_bytree': 0.6}
+[2025-07-30T03:10:02.881+0000] {fraud_detection_training.py:271} INFO - Best threshold for F1 score: 0.8703479170799255
+[2025-07-30T03:10:04.712+0000] {credentials.py:1147} INFO - Found credentials in environment variables.
+[2025-07-30T03:10:05.179+0000] {warnings.py:112} WARNING - /home/***/.local/lib/python3.12/site-packages/mlflow/types/utils.py:452: UserWarning: Hint: Inferred schema contains integer column(s). Integer columns in Python cannot represent missing values. If your input data contains missing values at inference time, it will be encoded as floats and will cause a schema enforcement error. The best way to avoid this problem is to infer the model schema based on a realistic data sample (training dataset) that includes missing values. Alternatively, you can declare integer columns as doubles (float64) whenever these columns may have missing values. See `Handling Integers With Missing Values <https://www.mlflow.org/docs/latest/models.html#handling-integers-with-missing-values>`_ for more details.
+  warnings.warn(
+
+[2025-07-30T03:10:05.187+0000] {logging_mixin.py:190} WARNING - 2025/07/30 03:10:05 WARNING mlflow.models.model: `artifact_path` is deprecated. Please use `name` instead.
+[2025-07-30T03:10:14.362+0000] {logging_mixin.py:190} WARNING - Successfully registered model 'fraud_detection_model'.
+[2025-07-30T03:10:14.480+0000] {logging_mixin.py:190} WARNING - 2025/07/30 03:10:14 INFO mlflow.store.model_registry.abstract_store: Waiting up to 300 seconds for model version to finish creation. Model name: fraud_detection_model, version 1
+[2025-07-30T03:10:14.481+0000] {logging_mixin.py:190} WARNING - Created version '1' of model 'fraud_detection_model'.
+[2025-07-30T03:10:14.264+0000] {fraud_detection_training.py:330} INFO - Training successfully completed with metrics {'auc_pr': 0.47149095628675974, 'precision': 0.5416666666666666, 'recall': 0.2857142857142857, 'f1': 0.3155339805825243, 'threshold': 0.8703479170799255}
+[2025-07-30T03:10:14.279+0000] {logging_mixin.py:190} INFO - 🏃 View run zealous-loon-733 at: http://mlflow-server:5500/#/experiments/1/runs/3cb54f6fab7c405692f68b935cb85c16
+[2025-07-30T03:10:14.279+0000] {logging_mixin.py:190} INFO - 🧪 View experiment at: http://mlflow-server:5500/#/experiments/1
+[2025-07-30T03:10:14.305+0000] {python.py:240} INFO - Done. Returned value was: {'status': 'success', 'precision': {'auc_pr': 0.47149095628675974, 'precision': 0.5416666666666666, 'recall': 0.2857142857142857, 'f1': 0.3155339805825243, 'threshold': 0.8703479170799255}}
+[2025-07-30T03:10:14.339+0000] {taskinstance.py:341} INFO - ::group::Post task execution logs
+[2025-07-30T03:10:14.339+0000] {taskinstance.py:353} INFO - Marking task as SUCCESS. dag_id=fraud_detection_training, task_id=execute_training, run_id=manual__2025-07-30T03:01:29.815911+00:00, execution_date=20250730T030129, start_date=20250730T030131, end_date=20250730T031014
+[2025-07-30T03:10:14.410+0000] {local_task_job_runner.py:266} INFO - Task exited with return code 0
+[2025-07-30T03:10:14.431+0000] {taskinstance.py:3901} INFO - 1 downstream tasks scheduled from follow-on schedule check
+[2025-07-30T03:10:14.433+0000] {local_task_job_runner.py:245} INFO - ::endgroup::

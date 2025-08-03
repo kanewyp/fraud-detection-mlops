@@ -1,0 +1,23 @@
+[2025-08-03T12:58:31.381+0000] {local_task_job_runner.py:123} INFO - ::group::Pre task execution logs
+[2025-08-03T12:58:31.405+0000] {taskinstance.py:2614} INFO - Dependencies all met for dep_context=non-requeueable deps ti=<TaskInstance: fraud_detection_training.cleanup_resources manual__2025-08-03T12:03:31.931608+00:00 [queued]>
+[2025-08-03T12:58:31.415+0000] {taskinstance.py:2614} INFO - Dependencies all met for dep_context=requeueable deps ti=<TaskInstance: fraud_detection_training.cleanup_resources manual__2025-08-03T12:03:31.931608+00:00 [queued]>
+[2025-08-03T12:58:31.415+0000] {taskinstance.py:2867} INFO - Starting attempt 1 of 1
+[2025-08-03T12:58:31.428+0000] {taskinstance.py:2890} INFO - Executing <Task(BashOperator): cleanup_resources> on 2025-08-03 12:03:31.931608+00:00
+[2025-08-03T12:58:31.436+0000] {standard_task_runner.py:104} INFO - Running: ['***', 'tasks', 'run', 'fraud_detection_training', 'cleanup_resources', 'manual__2025-08-03T12:03:31.931608+00:00', '--job-id', '120', '--raw', '--subdir', 'DAGS_FOLDER/fraud_detection_training_dag.py', '--cfg-path', '/tmp/tmp8mplv2l6']
+[2025-08-03T12:58:31.436+0000] {warnings.py:112} WARNING - /home/***/.local/lib/python3.12/site-packages/***/task/task_runner/standard_task_runner.py:70: DeprecationWarning: This process (pid=696) is multi-threaded, use of fork() may lead to deadlocks in the child.
+  pid = os.fork()
+
+[2025-08-03T12:58:31.439+0000] {standard_task_runner.py:105} INFO - Job 120: Subtask cleanup_resources
+[2025-08-03T12:58:31.439+0000] {standard_task_runner.py:72} INFO - Started process 697 to run task
+[2025-08-03T12:58:31.494+0000] {task_command.py:467} INFO - Running <TaskInstance: fraud_detection_training.cleanup_resources manual__2025-08-03T12:03:31.931608+00:00 [running]> on host b7878819fc3d
+[2025-08-03T12:58:31.584+0000] {taskinstance.py:3134} INFO - Exporting env vars: AIRFLOW_CTX_DAG_OWNER='kanewyp' AIRFLOW_CTX_DAG_ID='fraud_detection_training' AIRFLOW_CTX_TASK_ID='cleanup_resources' AIRFLOW_CTX_EXECUTION_DATE='2025-08-03T12:03:31.931608+00:00' AIRFLOW_CTX_TRY_NUMBER='1' AIRFLOW_CTX_DAG_RUN_ID='manual__2025-08-03T12:03:31.931608+00:00'
+[2025-08-03T12:58:31.585+0000] {taskinstance.py:732} INFO - ::endgroup::
+[2025-08-03T12:58:31.604+0000] {subprocess.py:78} INFO - Tmp dir root location: /tmp
+[2025-08-03T12:58:31.605+0000] {subprocess.py:88} INFO - Running command: ['/usr/bin/bash', '-c', 'rm -f /app/tmp/*.pkl']
+[2025-08-03T12:58:31.618+0000] {subprocess.py:99} INFO - Output:
+[2025-08-03T12:58:31.627+0000] {subprocess.py:110} INFO - Command exited with return code 0
+[2025-08-03T12:58:31.656+0000] {taskinstance.py:341} INFO - ::group::Post task execution logs
+[2025-08-03T12:58:31.656+0000] {taskinstance.py:353} INFO - Marking task as SUCCESS. dag_id=fraud_detection_training, task_id=cleanup_resources, run_id=manual__2025-08-03T12:03:31.931608+00:00, execution_date=20250803T120331, start_date=20250803T125831, end_date=20250803T125831
+[2025-08-03T12:58:31.697+0000] {local_task_job_runner.py:266} INFO - Task exited with return code 0
+[2025-08-03T12:58:31.710+0000] {taskinstance.py:3901} INFO - 0 downstream tasks scheduled from follow-on schedule check
+[2025-08-03T12:58:31.712+0000] {local_task_job_runner.py:245} INFO - ::endgroup::

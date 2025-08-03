@@ -1,0 +1,227 @@
+[2025-07-29T02:07:19.292+0000] {local_task_job_runner.py:123} INFO - ::group::Pre task execution logs
+[2025-07-29T02:07:19.306+0000] {taskinstance.py:2614} INFO - Dependencies all met for dep_context=non-requeueable deps ti=<TaskInstance: fraud_detection_training.execute_training manual__2025-07-29T02:07:17.263375+00:00 [queued]>
+[2025-07-29T02:07:19.312+0000] {taskinstance.py:2614} INFO - Dependencies all met for dep_context=requeueable deps ti=<TaskInstance: fraud_detection_training.execute_training manual__2025-07-29T02:07:17.263375+00:00 [queued]>
+[2025-07-29T02:07:19.312+0000] {taskinstance.py:2867} INFO - Starting attempt 1 of 1
+[2025-07-29T02:07:19.320+0000] {taskinstance.py:2890} INFO - Executing <Task(PythonOperator): execute_training> on 2025-07-29 02:07:17.263375+00:00
+[2025-07-29T02:07:19.324+0000] {warnings.py:112} WARNING - /home/***/.local/lib/python3.12/site-packages/***/task/task_runner/standard_task_runner.py:70: DeprecationWarning: This process (pid=97) is multi-threaded, use of fork() may lead to deadlocks in the child.
+  pid = os.fork()
+
+[2025-07-29T02:07:19.326+0000] {standard_task_runner.py:72} INFO - Started process 98 to run task
+[2025-07-29T02:07:19.326+0000] {standard_task_runner.py:104} INFO - Running: ['***', 'tasks', 'run', 'fraud_detection_training', 'execute_training', 'manual__2025-07-29T02:07:17.263375+00:00', '--job-id', '30', '--raw', '--subdir', 'DAGS_FOLDER/fraud_detection_training_dag.py', '--cfg-path', '/tmp/tmpirwu_no_']
+[2025-07-29T02:07:19.326+0000] {standard_task_runner.py:105} INFO - Job 30: Subtask execute_training
+[2025-07-29T02:07:19.356+0000] {task_command.py:467} INFO - Running <TaskInstance: fraud_detection_training.execute_training manual__2025-07-29T02:07:17.263375+00:00 [running]> on host bde8c5542eb5
+[2025-07-29T02:07:19.410+0000] {taskinstance.py:3134} INFO - Exporting env vars: AIRFLOW_CTX_DAG_OWNER='kanewyp' AIRFLOW_CTX_DAG_ID='fraud_detection_training' AIRFLOW_CTX_TASK_ID='execute_training' AIRFLOW_CTX_EXECUTION_DATE='2025-07-29T02:07:17.263375+00:00' AIRFLOW_CTX_TRY_NUMBER='1' AIRFLOW_CTX_DAG_RUN_ID='manual__2025-07-29T02:07:17.263375+00:00'
+[2025-07-29T02:07:19.411+0000] {taskinstance.py:732} INFO - ::endgroup::
+[2025-07-29T02:07:22.991+0000] {font_manager.py:1639} INFO - generated new fontManager
+[2025-07-29T02:07:22.682+0000] {fraud_detection_training_dag.py:22} INFO - Initializing Fraud Detection Training
+[2025-07-29T02:07:22.688+0000] {fraud_detection_training.py:62} INFO - Configuration loaded successfully
+[2025-07-29T02:07:26.493+0000] {fraud_detection_training.py:88} INFO - Connected to MinIO. Available buckets: mlflow
+[2025-07-29T02:07:27.154+0000] {fraud_detection_training.py:182} INFO - Starting model training process...
+[2025-07-29T02:07:27.154+0000] {fraud_detection_training.py:104} INFO - Reading data from Kafka topic: fraud_detection
+[2025-07-29T02:07:27.230+0000] {conn.py:396} INFO - <BrokerConnection client_id=kafka-python-2.2.15, node_id=bootstrap-0 host=pkc-ldvj1.ap-southeast-2.aws.confluent.cloud:9092 <connecting> [IPv4 ('13.237.143.76', 9092)]>: connecting to pkc-ldvj1.ap-southeast-2.aws.confluent.cloud:9092 [('13.237.143.76', 9092) IPv4]
+[2025-07-29T02:07:27.262+0000] {conn.py:497} INFO - <BrokerConnection client_id=kafka-python-2.2.15, node_id=bootstrap-0 host=pkc-ldvj1.ap-southeast-2.aws.confluent.cloud:9092 <handshake> [IPv4 ('13.237.143.76', 9092)]>: Loading system default SSL CAs from ('/usr/lib/ssl/cert.pem', '/usr/lib/ssl/certs', 'SSL_CERT_FILE', '/usr/lib/ssl/cert.pem', 'SSL_CERT_DIR', '/usr/lib/ssl/certs')
+[2025-07-29T02:07:27.385+0000] {conn.py:618} INFO - <BrokerConnection client_id=kafka-python-2.2.15, node_id=bootstrap-0 host=pkc-ldvj1.ap-southeast-2.aws.confluent.cloud:9092 <checking_api_versions_recv> [IPv4 ('13.237.143.76', 9092)]>: Broker version identified as 2.6
+[2025-07-29T02:07:27.537+0000] {conn.py:822} INFO - <BrokerConnection client_id=kafka-python-2.2.15, node_id=bootstrap-0 host=pkc-ldvj1.ap-southeast-2.aws.confluent.cloud:9092 <authenticating> [IPv4 ('13.237.143.76', 9092)]>: Authenticated as KQIWVOLDBVJZDLTP via SASL / Plain
+[2025-07-29T02:07:27.538+0000] {conn.py:467} INFO - <BrokerConnection client_id=kafka-python-2.2.15, node_id=bootstrap-0 host=pkc-ldvj1.ap-southeast-2.aws.confluent.cloud:9092 <connected> [IPv4 ('13.237.143.76', 9092)]>: Connection complete.
+[2025-07-29T02:07:27.538+0000] {consumer.py:120} WARNING - group_id is None: disabling auto-commit.
+[2025-07-29T02:07:27.539+0000] {subscription_state.py:181} INFO - Updating subscribed topics to: ('fraud_detection',)
+[2025-07-29T02:07:27.569+0000] {subscription_state.py:254} INFO - Updated partition assignment: [('fraud_detection', 0), ('fraud_detection', 1), ('fraud_detection', 2), ('fraud_detection', 3), ('fraud_detection', 4), ('fraud_detection', 5)]
+[2025-07-29T02:07:27.619+0000] {conn.py:396} INFO - <BrokerConnection client_id=kafka-python-2.2.15, node_id=0 host=b0-pkc-ldvj1.ap-southeast-2.aws.confluent.cloud:9092 <connecting> [IPv4 ('52.65.62.109', 9092)]>: connecting to b0-pkc-ldvj1.ap-southeast-2.aws.confluent.cloud:9092 [('52.65.62.109', 9092) IPv4]
+[2025-07-29T02:07:27.672+0000] {conn.py:396} INFO - <BrokerConnection client_id=kafka-python-2.2.15, node_id=1 host=b1-pkc-ldvj1.ap-southeast-2.aws.confluent.cloud:9092 <connecting> [IPv4 ('52.63.214.73', 9092)]>: connecting to b1-pkc-ldvj1.ap-southeast-2.aws.confluent.cloud:9092 [('52.63.214.73', 9092) IPv4]
+[2025-07-29T02:07:27.725+0000] {conn.py:396} INFO - <BrokerConnection client_id=kafka-python-2.2.15, node_id=2 host=b2-pkc-ldvj1.ap-southeast-2.aws.confluent.cloud:9092 <connecting> [IPv4 ('13.210.234.188', 9092)]>: connecting to b2-pkc-ldvj1.ap-southeast-2.aws.confluent.cloud:9092 [('13.210.234.188', 9092) IPv4]
+[2025-07-29T02:07:27.769+0000] {conn.py:396} INFO - <BrokerConnection client_id=kafka-python-2.2.15, node_id=3 host=b3-pkc-ldvj1.ap-southeast-2.aws.confluent.cloud:9092 <connecting> [IPv4 ('3.106.149.208', 9092)]>: connecting to b3-pkc-ldvj1.ap-southeast-2.aws.confluent.cloud:9092 [('3.106.149.208', 9092) IPv4]
+[2025-07-29T02:07:27.816+0000] {conn.py:396} INFO - <BrokerConnection client_id=kafka-python-2.2.15, node_id=4 host=b4-pkc-ldvj1.ap-southeast-2.aws.confluent.cloud:9092 <connecting> [IPv4 ('13.210.104.107', 9092)]>: connecting to b4-pkc-ldvj1.ap-southeast-2.aws.confluent.cloud:9092 [('13.210.104.107', 9092) IPv4]
+[2025-07-29T02:07:27.867+0000] {conn.py:396} INFO - <BrokerConnection client_id=kafka-python-2.2.15, node_id=5 host=b5-pkc-ldvj1.ap-southeast-2.aws.confluent.cloud:9092 <connecting> [IPv4 ('52.64.157.42', 9092)]>: connecting to b5-pkc-ldvj1.ap-southeast-2.aws.confluent.cloud:9092 [('52.64.157.42', 9092) IPv4]
+[2025-07-29T02:07:27.868+0000] {conn.py:497} INFO - <BrokerConnection client_id=kafka-python-2.2.15, node_id=0 host=b0-pkc-ldvj1.ap-southeast-2.aws.confluent.cloud:9092 <handshake> [IPv4 ('52.65.62.109', 9092)]>: Loading system default SSL CAs from ('/usr/lib/ssl/cert.pem', '/usr/lib/ssl/certs', 'SSL_CERT_FILE', '/usr/lib/ssl/cert.pem', 'SSL_CERT_DIR', '/usr/lib/ssl/certs')
+[2025-07-29T02:07:27.885+0000] {conn.py:497} INFO - <BrokerConnection client_id=kafka-python-2.2.15, node_id=1 host=b1-pkc-ldvj1.ap-southeast-2.aws.confluent.cloud:9092 <handshake> [IPv4 ('52.63.214.73', 9092)]>: Loading system default SSL CAs from ('/usr/lib/ssl/cert.pem', '/usr/lib/ssl/certs', 'SSL_CERT_FILE', '/usr/lib/ssl/cert.pem', 'SSL_CERT_DIR', '/usr/lib/ssl/certs')
+[2025-07-29T02:07:27.901+0000] {conn.py:497} INFO - <BrokerConnection client_id=kafka-python-2.2.15, node_id=2 host=b2-pkc-ldvj1.ap-southeast-2.aws.confluent.cloud:9092 <handshake> [IPv4 ('13.210.234.188', 9092)]>: Loading system default SSL CAs from ('/usr/lib/ssl/cert.pem', '/usr/lib/ssl/certs', 'SSL_CERT_FILE', '/usr/lib/ssl/cert.pem', 'SSL_CERT_DIR', '/usr/lib/ssl/certs')
+[2025-07-29T02:07:27.918+0000] {conn.py:497} INFO - <BrokerConnection client_id=kafka-python-2.2.15, node_id=3 host=b3-pkc-ldvj1.ap-southeast-2.aws.confluent.cloud:9092 <handshake> [IPv4 ('3.106.149.208', 9092)]>: Loading system default SSL CAs from ('/usr/lib/ssl/cert.pem', '/usr/lib/ssl/certs', 'SSL_CERT_FILE', '/usr/lib/ssl/cert.pem', 'SSL_CERT_DIR', '/usr/lib/ssl/certs')
+[2025-07-29T02:07:27.934+0000] {conn.py:497} INFO - <BrokerConnection client_id=kafka-python-2.2.15, node_id=4 host=b4-pkc-ldvj1.ap-southeast-2.aws.confluent.cloud:9092 <handshake> [IPv4 ('13.210.104.107', 9092)]>: Loading system default SSL CAs from ('/usr/lib/ssl/cert.pem', '/usr/lib/ssl/certs', 'SSL_CERT_FILE', '/usr/lib/ssl/cert.pem', 'SSL_CERT_DIR', '/usr/lib/ssl/certs')
+[2025-07-29T02:07:27.953+0000] {conn.py:497} INFO - <BrokerConnection client_id=kafka-python-2.2.15, node_id=5 host=b5-pkc-ldvj1.ap-southeast-2.aws.confluent.cloud:9092 <handshake> [IPv4 ('52.64.157.42', 9092)]>: Loading system default SSL CAs from ('/usr/lib/ssl/cert.pem', '/usr/lib/ssl/certs', 'SSL_CERT_FILE', '/usr/lib/ssl/cert.pem', 'SSL_CERT_DIR', '/usr/lib/ssl/certs')
+[2025-07-29T02:07:28.122+0000] {conn.py:822} INFO - <BrokerConnection client_id=kafka-python-2.2.15, node_id=0 host=b0-pkc-ldvj1.ap-southeast-2.aws.confluent.cloud:9092 <authenticating> [IPv4 ('52.65.62.109', 9092)]>: Authenticated as KQIWVOLDBVJZDLTP via SASL / Plain
+[2025-07-29T02:07:28.123+0000] {conn.py:467} INFO - <BrokerConnection client_id=kafka-python-2.2.15, node_id=0 host=b0-pkc-ldvj1.ap-southeast-2.aws.confluent.cloud:9092 <connected> [IPv4 ('52.65.62.109', 9092)]>: Connection complete.
+[2025-07-29T02:07:28.123+0000] {conn.py:945} INFO - <BrokerConnection client_id=kafka-python-2.2.15, node_id=bootstrap-0 host=pkc-ldvj1.ap-southeast-2.aws.confluent.cloud:9092 <connected> [IPv4 ('13.237.143.76', 9092)]>: Closing connection. 
+[2025-07-29T02:07:28.242+0000] {conn.py:822} INFO - <BrokerConnection client_id=kafka-python-2.2.15, node_id=1 host=b1-pkc-ldvj1.ap-southeast-2.aws.confluent.cloud:9092 <authenticating> [IPv4 ('52.63.214.73', 9092)]>: Authenticated as KQIWVOLDBVJZDLTP via SASL / Plain
+[2025-07-29T02:07:28.243+0000] {conn.py:467} INFO - <BrokerConnection client_id=kafka-python-2.2.15, node_id=1 host=b1-pkc-ldvj1.ap-southeast-2.aws.confluent.cloud:9092 <connected> [IPv4 ('52.63.214.73', 9092)]>: Connection complete.
+[2025-07-29T02:07:28.361+0000] {conn.py:822} INFO - <BrokerConnection client_id=kafka-python-2.2.15, node_id=2 host=b2-pkc-ldvj1.ap-southeast-2.aws.confluent.cloud:9092 <authenticating> [IPv4 ('13.210.234.188', 9092)]>: Authenticated as KQIWVOLDBVJZDLTP via SASL / Plain
+[2025-07-29T02:07:28.361+0000] {conn.py:467} INFO - <BrokerConnection client_id=kafka-python-2.2.15, node_id=2 host=b2-pkc-ldvj1.ap-southeast-2.aws.confluent.cloud:9092 <connected> [IPv4 ('13.210.234.188', 9092)]>: Connection complete.
+[2025-07-29T02:07:28.394+0000] {conn.py:822} INFO - <BrokerConnection client_id=kafka-python-2.2.15, node_id=3 host=b3-pkc-ldvj1.ap-southeast-2.aws.confluent.cloud:9092 <authenticating> [IPv4 ('3.106.149.208', 9092)]>: Authenticated as KQIWVOLDBVJZDLTP via SASL / Plain
+[2025-07-29T02:07:28.395+0000] {conn.py:467} INFO - <BrokerConnection client_id=kafka-python-2.2.15, node_id=3 host=b3-pkc-ldvj1.ap-southeast-2.aws.confluent.cloud:9092 <connected> [IPv4 ('3.106.149.208', 9092)]>: Connection complete.
+[2025-07-29T02:07:28.505+0000] {conn.py:822} INFO - <BrokerConnection client_id=kafka-python-2.2.15, node_id=4 host=b4-pkc-ldvj1.ap-southeast-2.aws.confluent.cloud:9092 <authenticating> [IPv4 ('13.210.104.107', 9092)]>: Authenticated as KQIWVOLDBVJZDLTP via SASL / Plain
+[2025-07-29T02:07:28.505+0000] {conn.py:467} INFO - <BrokerConnection client_id=kafka-python-2.2.15, node_id=4 host=b4-pkc-ldvj1.ap-southeast-2.aws.confluent.cloud:9092 <connected> [IPv4 ('13.210.104.107', 9092)]>: Connection complete.
+[2025-07-29T02:07:28.621+0000] {conn.py:822} INFO - <BrokerConnection client_id=kafka-python-2.2.15, node_id=5 host=b5-pkc-ldvj1.ap-southeast-2.aws.confluent.cloud:9092 <authenticating> [IPv4 ('52.64.157.42', 9092)]>: Authenticated as KQIWVOLDBVJZDLTP via SASL / Plain
+[2025-07-29T02:07:28.622+0000] {conn.py:467} INFO - <BrokerConnection client_id=kafka-python-2.2.15, node_id=5 host=b5-pkc-ldvj1.ap-southeast-2.aws.confluent.cloud:9092 <connected> [IPv4 ('52.64.157.42', 9092)]>: Connection complete.
+[2025-07-29T02:07:28.622+0000] {fetcher.py:418} INFO - Resetting offset for partition ('fraud_detection', 0) to offset 0.
+[2025-07-29T02:07:28.624+0000] {fetcher.py:418} INFO - Resetting offset for partition ('fraud_detection', 1) to offset 0.
+[2025-07-29T02:07:28.624+0000] {fetcher.py:418} INFO - Resetting offset for partition ('fraud_detection', 2) to offset 0.
+[2025-07-29T02:07:28.624+0000] {fetcher.py:418} INFO - Resetting offset for partition ('fraud_detection', 3) to offset 0.
+[2025-07-29T02:07:28.624+0000] {fetcher.py:418} INFO - Resetting offset for partition ('fraud_detection', 4) to offset 0.
+[2025-07-29T02:07:28.655+0000] {fetcher.py:418} INFO - Resetting offset for partition ('fraud_detection', 5) to offset 0.
+[2025-07-29T02:08:19.695+0000] {conn.py:945} INFO - <BrokerConnection client_id=kafka-python-2.2.15, node_id=0 host=b0-pkc-ldvj1.ap-southeast-2.aws.confluent.cloud:9092 <connected> [IPv4 ('52.65.62.109', 9092)]>: Closing connection. 
+[2025-07-29T02:08:19.703+0000] {fetcher.py:786} INFO - Fetch to node 0 failed: Cancelled: <BrokerConnection client_id=kafka-python-2.2.15, node_id=0 host=b0-pkc-ldvj1.ap-southeast-2.aws.confluent.cloud:9092 <connected> [IPv4 ('52.65.62.109', 9092)]>
+[2025-07-29T02:08:19.703+0000] {conn.py:945} INFO - <BrokerConnection client_id=kafka-python-2.2.15, node_id=1 host=b1-pkc-ldvj1.ap-southeast-2.aws.confluent.cloud:9092 <connected> [IPv4 ('52.63.214.73', 9092)]>: Closing connection. 
+[2025-07-29T02:08:19.704+0000] {fetcher.py:786} INFO - Fetch to node 1 failed: Cancelled: <BrokerConnection client_id=kafka-python-2.2.15, node_id=1 host=b1-pkc-ldvj1.ap-southeast-2.aws.confluent.cloud:9092 <connected> [IPv4 ('52.63.214.73', 9092)]>
+[2025-07-29T02:08:19.704+0000] {conn.py:945} INFO - <BrokerConnection client_id=kafka-python-2.2.15, node_id=2 host=b2-pkc-ldvj1.ap-southeast-2.aws.confluent.cloud:9092 <connected> [IPv4 ('13.210.234.188', 9092)]>: Closing connection. 
+[2025-07-29T02:08:19.704+0000] {fetcher.py:786} INFO - Fetch to node 2 failed: Cancelled: <BrokerConnection client_id=kafka-python-2.2.15, node_id=2 host=b2-pkc-ldvj1.ap-southeast-2.aws.confluent.cloud:9092 <connected> [IPv4 ('13.210.234.188', 9092)]>
+[2025-07-29T02:08:19.705+0000] {conn.py:945} INFO - <BrokerConnection client_id=kafka-python-2.2.15, node_id=3 host=b3-pkc-ldvj1.ap-southeast-2.aws.confluent.cloud:9092 <connected> [IPv4 ('3.106.149.208', 9092)]>: Closing connection. 
+[2025-07-29T02:08:19.705+0000] {fetcher.py:786} INFO - Fetch to node 3 failed: Cancelled: <BrokerConnection client_id=kafka-python-2.2.15, node_id=3 host=b3-pkc-ldvj1.ap-southeast-2.aws.confluent.cloud:9092 <connected> [IPv4 ('3.106.149.208', 9092)]>
+[2025-07-29T02:08:19.705+0000] {conn.py:945} INFO - <BrokerConnection client_id=kafka-python-2.2.15, node_id=4 host=b4-pkc-ldvj1.ap-southeast-2.aws.confluent.cloud:9092 <connected> [IPv4 ('13.210.104.107', 9092)]>: Closing connection. 
+[2025-07-29T02:08:19.706+0000] {fetcher.py:786} INFO - Fetch to node 4 failed: Cancelled: <BrokerConnection client_id=kafka-python-2.2.15, node_id=4 host=b4-pkc-ldvj1.ap-southeast-2.aws.confluent.cloud:9092 <connected> [IPv4 ('13.210.104.107', 9092)]>
+[2025-07-29T02:08:19.707+0000] {conn.py:945} INFO - <BrokerConnection client_id=kafka-python-2.2.15, node_id=5 host=b5-pkc-ldvj1.ap-southeast-2.aws.confluent.cloud:9092 <connected> [IPv4 ('52.64.157.42', 9092)]>: Closing connection. 
+[2025-07-29T02:08:19.708+0000] {fetcher.py:786} INFO - Fetch to node 5 failed: Cancelled: <BrokerConnection client_id=kafka-python-2.2.15, node_id=5 host=b5-pkc-ldvj1.ap-southeast-2.aws.confluent.cloud:9092 <connected> [IPv4 ('52.64.157.42', 9092)]>
+[2025-07-29T02:08:21.816+0000] {fraud_detection_training.py:131} INFO - Received 410140 records from Kafka with fraud rate: 0.74%
+[2025-07-29T02:08:35.130+0000] {fraud_detection_training.py:261} INFO - Starting hyperparameter tuning...
+[2025-07-29T02:08:35.138+0000] {warnings.py:112} WARNING - /home/***/.local/lib/python3.12/site-packages/joblib/parallel.py:1379: UserWarning: Loky-backed parallel loops cannot be called in a multiprocessing, setting n_jobs=1
+  n_jobs = self._backend.configure(
+
+[2025-07-29T02:08:51.234+0000] {job.py:239} ERROR - Job heartbeat failed with error
+Traceback (most recent call last):
+  File "/home/airflow/.local/lib/python3.12/site-packages/sqlalchemy/engine/base.py", line 3371, in _wrap_pool_connect
+    return fn()
+           ^^^^
+  File "/home/airflow/.local/lib/python3.12/site-packages/sqlalchemy/pool/base.py", line 327, in connect
+    return _ConnectionFairy._checkout(self)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/airflow/.local/lib/python3.12/site-packages/sqlalchemy/pool/base.py", line 894, in _checkout
+    fairy = _ConnectionRecord.checkout(pool)
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/airflow/.local/lib/python3.12/site-packages/sqlalchemy/pool/base.py", line 493, in checkout
+    rec = pool._do_get()
+          ^^^^^^^^^^^^^^
+  File "/home/airflow/.local/lib/python3.12/site-packages/sqlalchemy/pool/impl.py", line 256, in _do_get
+    return self._create_connection()
+           ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/airflow/.local/lib/python3.12/site-packages/sqlalchemy/pool/base.py", line 273, in _create_connection
+    return _ConnectionRecord(self)
+           ^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/airflow/.local/lib/python3.12/site-packages/sqlalchemy/pool/base.py", line 388, in __init__
+    self.__connect()
+  File "/home/airflow/.local/lib/python3.12/site-packages/sqlalchemy/pool/base.py", line 690, in __connect
+    with util.safe_reraise():
+         ^^^^^^^^^^^^^^^^^^^
+  File "/home/airflow/.local/lib/python3.12/site-packages/sqlalchemy/util/langhelpers.py", line 70, in __exit__
+    compat.raise_(
+  File "/home/airflow/.local/lib/python3.12/site-packages/sqlalchemy/util/compat.py", line 211, in raise_
+    raise exception
+  File "/home/airflow/.local/lib/python3.12/site-packages/sqlalchemy/pool/base.py", line 686, in __connect
+    self.dbapi_connection = connection = pool._invoke_creator(self)
+                                         ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/airflow/.local/lib/python3.12/site-packages/sqlalchemy/engine/create.py", line 574, in connect
+    return dialect.connect(*cargs, **cparams)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/airflow/.local/lib/python3.12/site-packages/sqlalchemy/engine/default.py", line 598, in connect
+    return self.dbapi.connect(*cargs, **cparams)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/airflow/.local/lib/python3.12/site-packages/psycopg2/__init__.py", line 122, in connect
+    conn = _connect(dsn, connection_factory=connection_factory, **kwasync)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+psycopg2.OperationalError: could not translate host name "postgres" to address: Temporary failure in name resolution
+
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/home/airflow/.local/lib/python3.12/site-packages/airflow/jobs/job.py", line 233, in heartbeat
+    heartbeat_callback(session)
+  File "/home/airflow/.local/lib/python3.12/site-packages/airflow/utils/session.py", line 94, in wrapper
+    return func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "/home/airflow/.local/lib/python3.12/site-packages/airflow/jobs/local_task_job_runner.py", line 284, in heartbeat_callback
+    self.task_instance.refresh_from_db()
+  File "/home/airflow/.local/lib/python3.12/site-packages/airflow/utils/session.py", line 97, in wrapper
+    return func(*args, session=session, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/airflow/.local/lib/python3.12/site-packages/airflow/models/taskinstance.py", line 2360, in refresh_from_db
+    _refresh_from_db(task_instance=self, session=session, lock_for_update=lock_for_update)
+  File "/home/airflow/.local/lib/python3.12/site-packages/airflow/models/taskinstance.py", line 873, in _refresh_from_db
+    ti = TaskInstance.get_task_instance(
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/airflow/.local/lib/python3.12/site-packages/airflow/api_internal/internal_api_call.py", line 166, in wrapper
+    return func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "/home/airflow/.local/lib/python3.12/site-packages/airflow/utils/session.py", line 94, in wrapper
+    return func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "/home/airflow/.local/lib/python3.12/site-packages/airflow/models/taskinstance.py", line 2346, in get_task_instance
+    return query.one_or_none()
+           ^^^^^^^^^^^^^^^^^^^
+  File "/home/airflow/.local/lib/python3.12/site-packages/sqlalchemy/orm/query.py", line 2850, in one_or_none
+    return self._iter().one_or_none()
+           ^^^^^^^^^^^^
+  File "/home/airflow/.local/lib/python3.12/site-packages/sqlalchemy/orm/query.py", line 2916, in _iter
+    result = self.session.execute(
+             ^^^^^^^^^^^^^^^^^^^^^
+  File "/home/airflow/.local/lib/python3.12/site-packages/sqlalchemy/orm/session.py", line 1716, in execute
+    conn = self._connection_for_bind(bind)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/airflow/.local/lib/python3.12/site-packages/sqlalchemy/orm/session.py", line 1555, in _connection_for_bind
+    return self._transaction._connection_for_bind(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/airflow/.local/lib/python3.12/site-packages/sqlalchemy/orm/session.py", line 750, in _connection_for_bind
+    conn = bind.connect()
+           ^^^^^^^^^^^^^^
+  File "/home/airflow/.local/lib/python3.12/site-packages/sqlalchemy/future/engine.py", line 412, in connect
+    return super(Engine, self).connect()
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/airflow/.local/lib/python3.12/site-packages/sqlalchemy/engine/base.py", line 3325, in connect
+    return self._connection_cls(self, close_with_result=close_with_result)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/airflow/.local/lib/python3.12/site-packages/sqlalchemy/engine/base.py", line 96, in __init__
+    else engine.raw_connection()
+         ^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/airflow/.local/lib/python3.12/site-packages/sqlalchemy/engine/base.py", line 3404, in raw_connection
+    return self._wrap_pool_connect(self.pool.connect, _connection)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/airflow/.local/lib/python3.12/site-packages/sqlalchemy/engine/base.py", line 3374, in _wrap_pool_connect
+    Connection._handle_dbapi_exception_noconnection(
+  File "/home/airflow/.local/lib/python3.12/site-packages/sqlalchemy/engine/base.py", line 2208, in _handle_dbapi_exception_noconnection
+    util.raise_(
+  File "/home/airflow/.local/lib/python3.12/site-packages/sqlalchemy/util/compat.py", line 211, in raise_
+    raise exception
+  File "/home/airflow/.local/lib/python3.12/site-packages/sqlalchemy/engine/base.py", line 3371, in _wrap_pool_connect
+    return fn()
+           ^^^^
+  File "/home/airflow/.local/lib/python3.12/site-packages/sqlalchemy/pool/base.py", line 327, in connect
+    return _ConnectionFairy._checkout(self)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/airflow/.local/lib/python3.12/site-packages/sqlalchemy/pool/base.py", line 894, in _checkout
+    fairy = _ConnectionRecord.checkout(pool)
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/airflow/.local/lib/python3.12/site-packages/sqlalchemy/pool/base.py", line 493, in checkout
+    rec = pool._do_get()
+          ^^^^^^^^^^^^^^
+  File "/home/airflow/.local/lib/python3.12/site-packages/sqlalchemy/pool/impl.py", line 256, in _do_get
+    return self._create_connection()
+           ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/airflow/.local/lib/python3.12/site-packages/sqlalchemy/pool/base.py", line 273, in _create_connection
+    return _ConnectionRecord(self)
+           ^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/airflow/.local/lib/python3.12/site-packages/sqlalchemy/pool/base.py", line 388, in __init__
+    self.__connect()
+  File "/home/airflow/.local/lib/python3.12/site-packages/sqlalchemy/pool/base.py", line 690, in __connect
+    with util.safe_reraise():
+         ^^^^^^^^^^^^^^^^^^^
+  File "/home/airflow/.local/lib/python3.12/site-packages/sqlalchemy/util/langhelpers.py", line 70, in __exit__
+    compat.raise_(
+  File "/home/airflow/.local/lib/python3.12/site-packages/sqlalchemy/util/compat.py", line 211, in raise_
+    raise exception
+  File "/home/airflow/.local/lib/python3.12/site-packages/sqlalchemy/pool/base.py", line 686, in __connect
+    self.dbapi_connection = connection = pool._invoke_creator(self)
+                                         ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/airflow/.local/lib/python3.12/site-packages/sqlalchemy/engine/create.py", line 574, in connect
+    return dialect.connect(*cargs, **cparams)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/airflow/.local/lib/python3.12/site-packages/sqlalchemy/engine/default.py", line 598, in connect
+    return self.dbapi.connect(*cargs, **cparams)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/airflow/.local/lib/python3.12/site-packages/psycopg2/__init__.py", line 122, in connect
+    conn = _connect(dsn, connection_factory=connection_factory, **kwasync)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+sqlalchemy.exc.OperationalError: (psycopg2.OperationalError) could not translate host name "postgres" to address: Temporary failure in name resolution
+
+(Background on this error at: https://sqlalche.me/e/14/e3q8)
+[2025-07-29T02:08:51.348+0000] {job.py:245} ERROR - Job heartbeat failed with error. Scheduler may go into unhealthy state
+[2025-07-29T02:09:30.774+0000] {job.py:254} ERROR - Job heartbeat failed with error. Scheduler is in unhealthy state
+[2025-07-29T02:10:11.576+0000] {job.py:254} ERROR - Job heartbeat failed with error. Scheduler is in unhealthy state
+[2025-07-29T02:12:47.559+0000] {job.py:254} ERROR - Job heartbeat failed with error. Scheduler is in unhealthy state
+[2025-07-29T02:13:00.325+0000] {job.py:229} INFO - Heartbeat recovered after 259.13 seconds

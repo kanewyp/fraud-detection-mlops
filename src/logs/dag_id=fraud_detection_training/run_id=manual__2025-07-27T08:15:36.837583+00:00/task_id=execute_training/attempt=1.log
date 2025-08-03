@@ -1,0 +1,407 @@
+[2025-07-27T08:15:38.614+0000] {local_task_job_runner.py:123} INFO - ::group::Pre task execution logs
+[2025-07-27T08:15:38.632+0000] {taskinstance.py:2614} INFO - Dependencies all met for dep_context=non-requeueable deps ti=<TaskInstance: fraud_detection_training.execute_training manual__2025-07-27T08:15:36.837583+00:00 [queued]>
+[2025-07-27T08:15:38.639+0000] {taskinstance.py:2614} INFO - Dependencies all met for dep_context=requeueable deps ti=<TaskInstance: fraud_detection_training.execute_training manual__2025-07-27T08:15:36.837583+00:00 [queued]>
+[2025-07-27T08:15:38.639+0000] {taskinstance.py:2867} INFO - Starting attempt 1 of 1
+[2025-07-27T08:15:38.651+0000] {taskinstance.py:2890} INFO - Executing <Task(PythonOperator): execute_training> on 2025-07-27 08:15:36.837583+00:00
+[2025-07-27T08:15:38.657+0000] {warnings.py:112} WARNING - /home/***/.local/lib/python3.12/site-packages/***/task/task_runner/standard_task_runner.py:70: DeprecationWarning: This process (pid=439) is multi-threaded, use of fork() may lead to deadlocks in the child.
+  pid = os.fork()
+
+[2025-07-27T08:15:38.659+0000] {standard_task_runner.py:72} INFO - Started process 440 to run task
+[2025-07-27T08:15:38.659+0000] {standard_task_runner.py:104} INFO - Running: ['***', 'tasks', 'run', 'fraud_detection_training', 'execute_training', 'manual__2025-07-27T08:15:36.837583+00:00', '--job-id', '58', '--raw', '--subdir', 'DAGS_FOLDER/fraud_detection_training_dag.py', '--cfg-path', '/tmp/tmpvqeoxeon']
+[2025-07-27T08:15:38.659+0000] {standard_task_runner.py:105} INFO - Job 58: Subtask execute_training
+[2025-07-27T08:15:38.698+0000] {task_command.py:467} INFO - Running <TaskInstance: fraud_detection_training.execute_training manual__2025-07-27T08:15:36.837583+00:00 [running]> on host ab31951fb3a7
+[2025-07-27T08:15:38.782+0000] {taskinstance.py:3134} INFO - Exporting env vars: AIRFLOW_CTX_DAG_OWNER='kanewyp' AIRFLOW_CTX_DAG_ID='fraud_detection_training' AIRFLOW_CTX_TASK_ID='execute_training' AIRFLOW_CTX_EXECUTION_DATE='2025-07-27T08:15:36.837583+00:00' AIRFLOW_CTX_TRY_NUMBER='1' AIRFLOW_CTX_DAG_RUN_ID='manual__2025-07-27T08:15:36.837583+00:00'
+[2025-07-27T08:15:38.783+0000] {taskinstance.py:732} INFO - ::endgroup::
+[2025-07-27T08:15:42.799+0000] {fraud_detection_training_dag.py:22} INFO - Initializing Fraud Detection Training
+[2025-07-27T08:15:42.808+0000] {fraud_detection_training.py:62} INFO - Configuration loaded successfully
+[2025-07-27T08:15:43.432+0000] {fraud_detection_training.py:88} INFO - Connected to MinIO. Available buckets: mlflow
+[2025-07-27T08:15:44.523+0000] {fraud_detection_training.py:181} INFO - Starting model training process...
+[2025-07-27T08:15:44.523+0000] {fraud_detection_training.py:104} INFO - Reading data from Kafka topic: transactions
+[2025-07-27T08:15:44.699+0000] {conn.py:396} INFO - <BrokerConnection client_id=kafka-python-2.2.15, node_id=bootstrap-0 host=pkc-ldvj1.ap-southeast-2.aws.confluent.cloud:9092 <connecting> [IPv4 ('52.64.27.176', 9092)]>: connecting to pkc-ldvj1.ap-southeast-2.aws.confluent.cloud:9092 [('52.64.27.176', 9092) IPv4]
+[2025-07-27T08:15:44.744+0000] {conn.py:497} INFO - <BrokerConnection client_id=kafka-python-2.2.15, node_id=bootstrap-0 host=pkc-ldvj1.ap-southeast-2.aws.confluent.cloud:9092 <handshake> [IPv4 ('52.64.27.176', 9092)]>: Loading system default SSL CAs from ('/usr/lib/ssl/cert.pem', '/usr/lib/ssl/certs', 'SSL_CERT_FILE', '/usr/lib/ssl/cert.pem', 'SSL_CERT_DIR', '/usr/lib/ssl/certs')
+[2025-07-27T08:15:44.892+0000] {conn.py:618} INFO - <BrokerConnection client_id=kafka-python-2.2.15, node_id=bootstrap-0 host=pkc-ldvj1.ap-southeast-2.aws.confluent.cloud:9092 <checking_api_versions_recv> [IPv4 ('52.64.27.176', 9092)]>: Broker version identified as 2.6
+[2025-07-27T08:15:45.056+0000] {conn.py:822} INFO - <BrokerConnection client_id=kafka-python-2.2.15, node_id=bootstrap-0 host=pkc-ldvj1.ap-southeast-2.aws.confluent.cloud:9092 <authenticating> [IPv4 ('52.64.27.176', 9092)]>: Authenticated as KQIWVOLDBVJZDLTP via SASL / Plain
+[2025-07-27T08:15:45.057+0000] {conn.py:467} INFO - <BrokerConnection client_id=kafka-python-2.2.15, node_id=bootstrap-0 host=pkc-ldvj1.ap-southeast-2.aws.confluent.cloud:9092 <connected> [IPv4 ('52.64.27.176', 9092)]>: Connection complete.
+[2025-07-27T08:15:45.059+0000] {consumer.py:120} WARNING - group_id is None: disabling auto-commit.
+[2025-07-27T08:15:45.059+0000] {subscription_state.py:181} INFO - Updating subscribed topics to: ('transactions',)
+[2025-07-27T08:15:45.101+0000] {subscription_state.py:254} INFO - Updated partition assignment: [('transactions', 0), ('transactions', 1), ('transactions', 2), ('transactions', 3), ('transactions', 4), ('transactions', 5)]
+[2025-07-27T08:15:45.164+0000] {conn.py:396} INFO - <BrokerConnection client_id=kafka-python-2.2.15, node_id=0 host=b0-pkc-ldvj1.ap-southeast-2.aws.confluent.cloud:9092 <connecting> [IPv4 ('13.237.213.69', 9092)]>: connecting to b0-pkc-ldvj1.ap-southeast-2.aws.confluent.cloud:9092 [('13.237.213.69', 9092) IPv4]
+[2025-07-27T08:15:45.215+0000] {conn.py:396} INFO - <BrokerConnection client_id=kafka-python-2.2.15, node_id=1 host=b1-pkc-ldvj1.ap-southeast-2.aws.confluent.cloud:9092 <connecting> [IPv4 ('52.63.214.73', 9092)]>: connecting to b1-pkc-ldvj1.ap-southeast-2.aws.confluent.cloud:9092 [('52.63.214.73', 9092) IPv4]
+[2025-07-27T08:15:45.270+0000] {conn.py:396} INFO - <BrokerConnection client_id=kafka-python-2.2.15, node_id=2 host=b2-pkc-ldvj1.ap-southeast-2.aws.confluent.cloud:9092 <connecting> [IPv4 ('3.104.186.119', 9092)]>: connecting to b2-pkc-ldvj1.ap-southeast-2.aws.confluent.cloud:9092 [('3.104.186.119', 9092) IPv4]
+[2025-07-27T08:15:45.340+0000] {conn.py:396} INFO - <BrokerConnection client_id=kafka-python-2.2.15, node_id=3 host=b3-pkc-ldvj1.ap-southeast-2.aws.confluent.cloud:9092 <connecting> [IPv4 ('52.63.252.19', 9092)]>: connecting to b3-pkc-ldvj1.ap-southeast-2.aws.confluent.cloud:9092 [('52.63.252.19', 9092) IPv4]
+[2025-07-27T08:15:45.397+0000] {conn.py:396} INFO - <BrokerConnection client_id=kafka-python-2.2.15, node_id=4 host=b4-pkc-ldvj1.ap-southeast-2.aws.confluent.cloud:9092 <connecting> [IPv4 ('3.105.218.216', 9092)]>: connecting to b4-pkc-ldvj1.ap-southeast-2.aws.confluent.cloud:9092 [('3.105.218.216', 9092) IPv4]
+[2025-07-27T08:15:45.445+0000] {conn.py:396} INFO - <BrokerConnection client_id=kafka-python-2.2.15, node_id=5 host=b5-pkc-ldvj1.ap-southeast-2.aws.confluent.cloud:9092 <connecting> [IPv4 ('52.64.157.42', 9092)]>: connecting to b5-pkc-ldvj1.ap-southeast-2.aws.confluent.cloud:9092 [('52.64.157.42', 9092) IPv4]
+[2025-07-27T08:15:45.446+0000] {conn.py:497} INFO - <BrokerConnection client_id=kafka-python-2.2.15, node_id=0 host=b0-pkc-ldvj1.ap-southeast-2.aws.confluent.cloud:9092 <handshake> [IPv4 ('13.237.213.69', 9092)]>: Loading system default SSL CAs from ('/usr/lib/ssl/cert.pem', '/usr/lib/ssl/certs', 'SSL_CERT_FILE', '/usr/lib/ssl/cert.pem', 'SSL_CERT_DIR', '/usr/lib/ssl/certs')
+[2025-07-27T08:15:45.460+0000] {conn.py:497} INFO - <BrokerConnection client_id=kafka-python-2.2.15, node_id=1 host=b1-pkc-ldvj1.ap-southeast-2.aws.confluent.cloud:9092 <handshake> [IPv4 ('52.63.214.73', 9092)]>: Loading system default SSL CAs from ('/usr/lib/ssl/cert.pem', '/usr/lib/ssl/certs', 'SSL_CERT_FILE', '/usr/lib/ssl/cert.pem', 'SSL_CERT_DIR', '/usr/lib/ssl/certs')
+[2025-07-27T08:15:45.476+0000] {conn.py:497} INFO - <BrokerConnection client_id=kafka-python-2.2.15, node_id=2 host=b2-pkc-ldvj1.ap-southeast-2.aws.confluent.cloud:9092 <handshake> [IPv4 ('3.104.186.119', 9092)]>: Loading system default SSL CAs from ('/usr/lib/ssl/cert.pem', '/usr/lib/ssl/certs', 'SSL_CERT_FILE', '/usr/lib/ssl/cert.pem', 'SSL_CERT_DIR', '/usr/lib/ssl/certs')
+[2025-07-27T08:15:45.493+0000] {conn.py:497} INFO - <BrokerConnection client_id=kafka-python-2.2.15, node_id=3 host=b3-pkc-ldvj1.ap-southeast-2.aws.confluent.cloud:9092 <handshake> [IPv4 ('52.63.252.19', 9092)]>: Loading system default SSL CAs from ('/usr/lib/ssl/cert.pem', '/usr/lib/ssl/certs', 'SSL_CERT_FILE', '/usr/lib/ssl/cert.pem', 'SSL_CERT_DIR', '/usr/lib/ssl/certs')
+[2025-07-27T08:15:45.510+0000] {conn.py:497} INFO - <BrokerConnection client_id=kafka-python-2.2.15, node_id=4 host=b4-pkc-ldvj1.ap-southeast-2.aws.confluent.cloud:9092 <handshake> [IPv4 ('3.105.218.216', 9092)]>: Loading system default SSL CAs from ('/usr/lib/ssl/cert.pem', '/usr/lib/ssl/certs', 'SSL_CERT_FILE', '/usr/lib/ssl/cert.pem', 'SSL_CERT_DIR', '/usr/lib/ssl/certs')
+[2025-07-27T08:15:45.528+0000] {conn.py:497} INFO - <BrokerConnection client_id=kafka-python-2.2.15, node_id=5 host=b5-pkc-ldvj1.ap-southeast-2.aws.confluent.cloud:9092 <handshake> [IPv4 ('52.64.157.42', 9092)]>: Loading system default SSL CAs from ('/usr/lib/ssl/cert.pem', '/usr/lib/ssl/certs', 'SSL_CERT_FILE', '/usr/lib/ssl/cert.pem', 'SSL_CERT_DIR', '/usr/lib/ssl/certs')
+[2025-07-27T08:15:45.769+0000] {conn.py:822} INFO - <BrokerConnection client_id=kafka-python-2.2.15, node_id=4 host=b4-pkc-ldvj1.ap-southeast-2.aws.confluent.cloud:9092 <authenticating> [IPv4 ('3.105.218.216', 9092)]>: Authenticated as KQIWVOLDBVJZDLTP via SASL / Plain
+[2025-07-27T08:15:45.770+0000] {conn.py:467} INFO - <BrokerConnection client_id=kafka-python-2.2.15, node_id=4 host=b4-pkc-ldvj1.ap-southeast-2.aws.confluent.cloud:9092 <connected> [IPv4 ('3.105.218.216', 9092)]>: Connection complete.
+[2025-07-27T08:15:45.771+0000] {conn.py:945} INFO - <BrokerConnection client_id=kafka-python-2.2.15, node_id=bootstrap-0 host=pkc-ldvj1.ap-southeast-2.aws.confluent.cloud:9092 <connected> [IPv4 ('52.64.27.176', 9092)]>: Closing connection. 
+[2025-07-27T08:15:45.899+0000] {conn.py:822} INFO - <BrokerConnection client_id=kafka-python-2.2.15, node_id=2 host=b2-pkc-ldvj1.ap-southeast-2.aws.confluent.cloud:9092 <authenticating> [IPv4 ('3.104.186.119', 9092)]>: Authenticated as KQIWVOLDBVJZDLTP via SASL / Plain
+[2025-07-27T08:15:45.900+0000] {conn.py:467} INFO - <BrokerConnection client_id=kafka-python-2.2.15, node_id=2 host=b2-pkc-ldvj1.ap-southeast-2.aws.confluent.cloud:9092 <connected> [IPv4 ('3.104.186.119', 9092)]>: Connection complete.
+[2025-07-27T08:15:46.040+0000] {conn.py:822} INFO - <BrokerConnection client_id=kafka-python-2.2.15, node_id=0 host=b0-pkc-ldvj1.ap-southeast-2.aws.confluent.cloud:9092 <authenticating> [IPv4 ('13.237.213.69', 9092)]>: Authenticated as KQIWVOLDBVJZDLTP via SASL / Plain
+[2025-07-27T08:15:46.041+0000] {conn.py:467} INFO - <BrokerConnection client_id=kafka-python-2.2.15, node_id=0 host=b0-pkc-ldvj1.ap-southeast-2.aws.confluent.cloud:9092 <connected> [IPv4 ('13.237.213.69', 9092)]>: Connection complete.
+[2025-07-27T08:15:46.179+0000] {conn.py:822} INFO - <BrokerConnection client_id=kafka-python-2.2.15, node_id=1 host=b1-pkc-ldvj1.ap-southeast-2.aws.confluent.cloud:9092 <authenticating> [IPv4 ('52.63.214.73', 9092)]>: Authenticated as KQIWVOLDBVJZDLTP via SASL / Plain
+[2025-07-27T08:15:46.180+0000] {conn.py:467} INFO - <BrokerConnection client_id=kafka-python-2.2.15, node_id=1 host=b1-pkc-ldvj1.ap-southeast-2.aws.confluent.cloud:9092 <connected> [IPv4 ('52.63.214.73', 9092)]>: Connection complete.
+[2025-07-27T08:15:46.315+0000] {conn.py:822} INFO - <BrokerConnection client_id=kafka-python-2.2.15, node_id=3 host=b3-pkc-ldvj1.ap-southeast-2.aws.confluent.cloud:9092 <authenticating> [IPv4 ('52.63.252.19', 9092)]>: Authenticated as KQIWVOLDBVJZDLTP via SASL / Plain
+[2025-07-27T08:15:46.316+0000] {conn.py:467} INFO - <BrokerConnection client_id=kafka-python-2.2.15, node_id=3 host=b3-pkc-ldvj1.ap-southeast-2.aws.confluent.cloud:9092 <connected> [IPv4 ('52.63.252.19', 9092)]>: Connection complete.
+[2025-07-27T08:15:46.359+0000] {conn.py:822} INFO - <BrokerConnection client_id=kafka-python-2.2.15, node_id=5 host=b5-pkc-ldvj1.ap-southeast-2.aws.confluent.cloud:9092 <authenticating> [IPv4 ('52.64.157.42', 9092)]>: Authenticated as KQIWVOLDBVJZDLTP via SASL / Plain
+[2025-07-27T08:15:46.360+0000] {conn.py:467} INFO - <BrokerConnection client_id=kafka-python-2.2.15, node_id=5 host=b5-pkc-ldvj1.ap-southeast-2.aws.confluent.cloud:9092 <connected> [IPv4 ('52.64.157.42', 9092)]>: Connection complete.
+[2025-07-27T08:15:46.361+0000] {fetcher.py:418} INFO - Resetting offset for partition ('transactions', 4) to offset 0.
+[2025-07-27T08:15:46.364+0000] {fetcher.py:418} INFO - Resetting offset for partition ('transactions', 2) to offset 0.
+[2025-07-27T08:15:46.364+0000] {fetcher.py:418} INFO - Resetting offset for partition ('transactions', 0) to offset 0.
+[2025-07-27T08:15:46.365+0000] {fetcher.py:418} INFO - Resetting offset for partition ('transactions', 1) to offset 0.
+[2025-07-27T08:15:46.367+0000] {fetcher.py:418} INFO - Resetting offset for partition ('transactions', 3) to offset 0.
+[2025-07-27T08:15:46.402+0000] {fetcher.py:418} INFO - Resetting offset for partition ('transactions', 5) to offset 0.
+[2025-07-27T08:15:46.431+0000] {fraud_detection_training.py:134} ERROR - Failed to read data from Kafka: Expecting value: line 1 column 1 (char 0)
+Traceback (most recent call last):
+  File "/opt/airflow/dags/fraud_detection_training.py", line 117, in _read_data_from_kafka
+    messages = [msg.value for msg in consumer]
+                                     ^^^^^^^^
+  File "/home/airflow/.local/lib/python3.12/site-packages/kafka/consumer/group.py", line 1188, in __next__
+    return next(self._iterator)
+           ^^^^^^^^^^^^^^^^^^^^
+  File "/home/airflow/.local/lib/python3.12/site-packages/kafka/consumer/group.py", line 1160, in _message_generator_v2
+    record_map = self.poll(timeout_ms=timeout_ms, update_offsets=False)
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/airflow/.local/lib/python3.12/site-packages/kafka/consumer/group.py", line 684, in poll
+    records = self._poll_once(timer, max_records, update_offsets=update_offsets)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/airflow/.local/lib/python3.12/site-packages/kafka/consumer/group.py", line 738, in _poll_once
+    records, _ = self._fetcher.fetched_records(max_records, update_offsets=update_offsets)
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/airflow/.local/lib/python3.12/site-packages/kafka/consumer/fetcher.py", line 351, in fetched_records
+    raise e
+  File "/home/airflow/.local/lib/python3.12/site-packages/kafka/consumer/fetcher.py", line 345, in fetched_records
+    records_remaining -= self._append(drained,
+                         ^^^^^^^^^^^^^^^^^^^^^
+  File "/home/airflow/.local/lib/python3.12/site-packages/kafka/consumer/fetcher.py", line 379, in _append
+    part_records = part.take(max_records)
+                   ^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/airflow/.local/lib/python3.12/site-packages/kafka/consumer/fetcher.py", line 977, in take
+    raise e
+  File "/home/airflow/.local/lib/python3.12/site-packages/kafka/consumer/fetcher.py", line 974, in take
+    records.extend(itertools.islice(self.record_iterator, 0, n))
+  File "/home/airflow/.local/lib/python3.12/site-packages/kafka/consumer/fetcher.py", line 1034, in _unpack_records
+    value = self._deserialize(value_deserializer, tp.topic, record.value)
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/airflow/.local/lib/python3.12/site-packages/kafka/consumer/fetcher.py", line 1070, in _deserialize
+    return f(bytes_)
+           ^^^^^^^^^
+  File "/opt/airflow/dags/fraud_detection_training.py", line 113, in <lambda>
+    value_deserializer=lambda x: json.loads(x.decode('utf-8')),
+                                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/json/__init__.py", line 346, in loads
+    return _default_decoder.decode(s)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/json/decoder.py", line 338, in decode
+    obj, end = self.raw_decode(s, idx=_w(s, 0).end())
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/json/decoder.py", line 356, in raw_decode
+    raise JSONDecodeError("Expecting value", s, err.value) from None
+json.decoder.JSONDecodeError: Expecting value: line 1 column 1 (char 0)
+[2025-07-27T08:15:46.450+0000] {fraud_detection_training.py:336} ERROR - Training failed: Expecting value: line 1 column 1 (char 0)
+Traceback (most recent call last):
+  File "/opt/airflow/dags/fraud_detection_training.py", line 184, in train_model
+    df = self._read_data_from_kafka()
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/airflow/dags/fraud_detection_training.py", line 117, in _read_data_from_kafka
+    messages = [msg.value for msg in consumer]
+                                     ^^^^^^^^
+  File "/home/airflow/.local/lib/python3.12/site-packages/kafka/consumer/group.py", line 1188, in __next__
+    return next(self._iterator)
+           ^^^^^^^^^^^^^^^^^^^^
+  File "/home/airflow/.local/lib/python3.12/site-packages/kafka/consumer/group.py", line 1160, in _message_generator_v2
+    record_map = self.poll(timeout_ms=timeout_ms, update_offsets=False)
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/airflow/.local/lib/python3.12/site-packages/kafka/consumer/group.py", line 684, in poll
+    records = self._poll_once(timer, max_records, update_offsets=update_offsets)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/airflow/.local/lib/python3.12/site-packages/kafka/consumer/group.py", line 738, in _poll_once
+    records, _ = self._fetcher.fetched_records(max_records, update_offsets=update_offsets)
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/airflow/.local/lib/python3.12/site-packages/kafka/consumer/fetcher.py", line 351, in fetched_records
+    raise e
+  File "/home/airflow/.local/lib/python3.12/site-packages/kafka/consumer/fetcher.py", line 345, in fetched_records
+    records_remaining -= self._append(drained,
+                         ^^^^^^^^^^^^^^^^^^^^^
+  File "/home/airflow/.local/lib/python3.12/site-packages/kafka/consumer/fetcher.py", line 379, in _append
+    part_records = part.take(max_records)
+                   ^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/airflow/.local/lib/python3.12/site-packages/kafka/consumer/fetcher.py", line 977, in take
+    raise e
+  File "/home/airflow/.local/lib/python3.12/site-packages/kafka/consumer/fetcher.py", line 974, in take
+    records.extend(itertools.islice(self.record_iterator, 0, n))
+  File "/home/airflow/.local/lib/python3.12/site-packages/kafka/consumer/fetcher.py", line 1034, in _unpack_records
+    value = self._deserialize(value_deserializer, tp.topic, record.value)
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/airflow/.local/lib/python3.12/site-packages/kafka/consumer/fetcher.py", line 1070, in _deserialize
+    return f(bytes_)
+           ^^^^^^^^^
+  File "/opt/airflow/dags/fraud_detection_training.py", line 113, in <lambda>
+    value_deserializer=lambda x: json.loads(x.decode('utf-8')),
+                                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/json/__init__.py", line 346, in loads
+    return _default_decoder.decode(s)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/json/decoder.py", line 338, in decode
+    obj, end = self.raw_decode(s, idx=_w(s, 0).end())
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/json/decoder.py", line 356, in raw_decode
+    raise JSONDecodeError("Expecting value", s, err.value) from None
+json.decoder.JSONDecodeError: Expecting value: line 1 column 1 (char 0)
+[2025-07-27T08:15:46.455+0000] {fraud_detection_training_dag.py:28} ERROR - Training failed: Expecting value: line 1 column 1 (char 0)
+Traceback (most recent call last):
+  File "/opt/airflow/dags/fraud_detection_training_dag.py", line 24, in _train_model
+    model, precision = trainer.train_model()
+                       ^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/airflow/dags/fraud_detection_training.py", line 184, in train_model
+    df = self._read_data_from_kafka()
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/airflow/dags/fraud_detection_training.py", line 117, in _read_data_from_kafka
+    messages = [msg.value for msg in consumer]
+                                     ^^^^^^^^
+  File "/home/airflow/.local/lib/python3.12/site-packages/kafka/consumer/group.py", line 1188, in __next__
+    return next(self._iterator)
+           ^^^^^^^^^^^^^^^^^^^^
+  File "/home/airflow/.local/lib/python3.12/site-packages/kafka/consumer/group.py", line 1160, in _message_generator_v2
+    record_map = self.poll(timeout_ms=timeout_ms, update_offsets=False)
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/airflow/.local/lib/python3.12/site-packages/kafka/consumer/group.py", line 684, in poll
+    records = self._poll_once(timer, max_records, update_offsets=update_offsets)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/airflow/.local/lib/python3.12/site-packages/kafka/consumer/group.py", line 738, in _poll_once
+    records, _ = self._fetcher.fetched_records(max_records, update_offsets=update_offsets)
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/airflow/.local/lib/python3.12/site-packages/kafka/consumer/fetcher.py", line 351, in fetched_records
+    raise e
+  File "/home/airflow/.local/lib/python3.12/site-packages/kafka/consumer/fetcher.py", line 345, in fetched_records
+    records_remaining -= self._append(drained,
+                         ^^^^^^^^^^^^^^^^^^^^^
+  File "/home/airflow/.local/lib/python3.12/site-packages/kafka/consumer/fetcher.py", line 379, in _append
+    part_records = part.take(max_records)
+                   ^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/airflow/.local/lib/python3.12/site-packages/kafka/consumer/fetcher.py", line 977, in take
+    raise e
+  File "/home/airflow/.local/lib/python3.12/site-packages/kafka/consumer/fetcher.py", line 974, in take
+    records.extend(itertools.islice(self.record_iterator, 0, n))
+  File "/home/airflow/.local/lib/python3.12/site-packages/kafka/consumer/fetcher.py", line 1034, in _unpack_records
+    value = self._deserialize(value_deserializer, tp.topic, record.value)
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/airflow/.local/lib/python3.12/site-packages/kafka/consumer/fetcher.py", line 1070, in _deserialize
+    return f(bytes_)
+           ^^^^^^^^^
+  File "/opt/airflow/dags/fraud_detection_training.py", line 113, in <lambda>
+    value_deserializer=lambda x: json.loads(x.decode('utf-8')),
+                                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/json/__init__.py", line 346, in loads
+    return _default_decoder.decode(s)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/json/decoder.py", line 338, in decode
+    obj, end = self.raw_decode(s, idx=_w(s, 0).end())
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/json/decoder.py", line 356, in raw_decode
+    raise JSONDecodeError("Expecting value", s, err.value) from None
+json.decoder.JSONDecodeError: Expecting value: line 1 column 1 (char 0)
+[2025-07-27T08:15:46.468+0000] {taskinstance.py:3313} ERROR - Task failed with exception
+Traceback (most recent call last):
+  File "/opt/airflow/dags/fraud_detection_training_dag.py", line 24, in _train_model
+    model, precision = trainer.train_model()
+                       ^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/airflow/dags/fraud_detection_training.py", line 184, in train_model
+    df = self._read_data_from_kafka()
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/airflow/dags/fraud_detection_training.py", line 117, in _read_data_from_kafka
+    messages = [msg.value for msg in consumer]
+                                     ^^^^^^^^
+  File "/home/airflow/.local/lib/python3.12/site-packages/kafka/consumer/group.py", line 1188, in __next__
+    return next(self._iterator)
+           ^^^^^^^^^^^^^^^^^^^^
+  File "/home/airflow/.local/lib/python3.12/site-packages/kafka/consumer/group.py", line 1160, in _message_generator_v2
+    record_map = self.poll(timeout_ms=timeout_ms, update_offsets=False)
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/airflow/.local/lib/python3.12/site-packages/kafka/consumer/group.py", line 684, in poll
+    records = self._poll_once(timer, max_records, update_offsets=update_offsets)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/airflow/.local/lib/python3.12/site-packages/kafka/consumer/group.py", line 738, in _poll_once
+    records, _ = self._fetcher.fetched_records(max_records, update_offsets=update_offsets)
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/airflow/.local/lib/python3.12/site-packages/kafka/consumer/fetcher.py", line 351, in fetched_records
+    raise e
+  File "/home/airflow/.local/lib/python3.12/site-packages/kafka/consumer/fetcher.py", line 345, in fetched_records
+    records_remaining -= self._append(drained,
+                         ^^^^^^^^^^^^^^^^^^^^^
+  File "/home/airflow/.local/lib/python3.12/site-packages/kafka/consumer/fetcher.py", line 379, in _append
+    part_records = part.take(max_records)
+                   ^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/airflow/.local/lib/python3.12/site-packages/kafka/consumer/fetcher.py", line 977, in take
+    raise e
+  File "/home/airflow/.local/lib/python3.12/site-packages/kafka/consumer/fetcher.py", line 974, in take
+    records.extend(itertools.islice(self.record_iterator, 0, n))
+  File "/home/airflow/.local/lib/python3.12/site-packages/kafka/consumer/fetcher.py", line 1034, in _unpack_records
+    value = self._deserialize(value_deserializer, tp.topic, record.value)
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/airflow/.local/lib/python3.12/site-packages/kafka/consumer/fetcher.py", line 1070, in _deserialize
+    return f(bytes_)
+           ^^^^^^^^^
+  File "/opt/airflow/dags/fraud_detection_training.py", line 113, in <lambda>
+    value_deserializer=lambda x: json.loads(x.decode('utf-8')),
+                                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/json/__init__.py", line 346, in loads
+    return _default_decoder.decode(s)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/json/decoder.py", line 338, in decode
+    obj, end = self.raw_decode(s, idx=_w(s, 0).end())
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/json/decoder.py", line 356, in raw_decode
+    raise JSONDecodeError("Expecting value", s, err.value) from None
+json.decoder.JSONDecodeError: Expecting value: line 1 column 1 (char 0)
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/home/airflow/.local/lib/python3.12/site-packages/airflow/models/taskinstance.py", line 768, in _execute_task
+    result = _execute_callable(context=context, **execute_callable_kwargs)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/airflow/.local/lib/python3.12/site-packages/airflow/models/taskinstance.py", line 734, in _execute_callable
+    return ExecutionCallableRunner(
+           ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/airflow/.local/lib/python3.12/site-packages/airflow/utils/operator_helpers.py", line 252, in run
+    return self.func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/airflow/.local/lib/python3.12/site-packages/airflow/models/baseoperator.py", line 424, in wrapper
+    return func(self, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/airflow/.local/lib/python3.12/site-packages/airflow/operators/python.py", line 238, in execute
+    return_value = self.execute_callable()
+                   ^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/airflow/.local/lib/python3.12/site-packages/airflow/operators/python.py", line 256, in execute_callable
+    return runner.run(*self.op_args, **self.op_kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/airflow/.local/lib/python3.12/site-packages/airflow/utils/operator_helpers.py", line 252, in run
+    return self.func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/airflow/dags/fraud_detection_training_dag.py", line 29, in _train_model
+    raise AirflowException(f"Model Training failed: {str(e)}")
+airflow.exceptions.AirflowException: Model Training failed: Expecting value: line 1 column 1 (char 0)
+[2025-07-27T08:15:46.480+0000] {taskinstance.py:1226} INFO - Marking task as FAILED. dag_id=fraud_detection_training, task_id=execute_training, run_id=manual__2025-07-27T08:15:36.837583+00:00, execution_date=20250727T081536, start_date=20250727T081538, end_date=20250727T081546
+[2025-07-27T08:15:46.514+0000] {taskinstance.py:341} INFO - ::group::Post task execution logs
+[2025-07-27T08:15:46.514+0000] {standard_task_runner.py:124} ERROR - Failed to execute job 58 for task execute_training (Model Training failed: Expecting value: line 1 column 1 (char 0); 440)
+Traceback (most recent call last):
+  File "/opt/airflow/dags/fraud_detection_training_dag.py", line 24, in _train_model
+    model, precision = trainer.train_model()
+                       ^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/airflow/dags/fraud_detection_training.py", line 184, in train_model
+    df = self._read_data_from_kafka()
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/airflow/dags/fraud_detection_training.py", line 117, in _read_data_from_kafka
+    messages = [msg.value for msg in consumer]
+                                     ^^^^^^^^
+  File "/home/airflow/.local/lib/python3.12/site-packages/kafka/consumer/group.py", line 1188, in __next__
+    return next(self._iterator)
+           ^^^^^^^^^^^^^^^^^^^^
+  File "/home/airflow/.local/lib/python3.12/site-packages/kafka/consumer/group.py", line 1160, in _message_generator_v2
+    record_map = self.poll(timeout_ms=timeout_ms, update_offsets=False)
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/airflow/.local/lib/python3.12/site-packages/kafka/consumer/group.py", line 684, in poll
+    records = self._poll_once(timer, max_records, update_offsets=update_offsets)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/airflow/.local/lib/python3.12/site-packages/kafka/consumer/group.py", line 738, in _poll_once
+    records, _ = self._fetcher.fetched_records(max_records, update_offsets=update_offsets)
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/airflow/.local/lib/python3.12/site-packages/kafka/consumer/fetcher.py", line 351, in fetched_records
+    raise e
+  File "/home/airflow/.local/lib/python3.12/site-packages/kafka/consumer/fetcher.py", line 345, in fetched_records
+    records_remaining -= self._append(drained,
+                         ^^^^^^^^^^^^^^^^^^^^^
+  File "/home/airflow/.local/lib/python3.12/site-packages/kafka/consumer/fetcher.py", line 379, in _append
+    part_records = part.take(max_records)
+                   ^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/airflow/.local/lib/python3.12/site-packages/kafka/consumer/fetcher.py", line 977, in take
+    raise e
+  File "/home/airflow/.local/lib/python3.12/site-packages/kafka/consumer/fetcher.py", line 974, in take
+    records.extend(itertools.islice(self.record_iterator, 0, n))
+  File "/home/airflow/.local/lib/python3.12/site-packages/kafka/consumer/fetcher.py", line 1034, in _unpack_records
+    value = self._deserialize(value_deserializer, tp.topic, record.value)
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/airflow/.local/lib/python3.12/site-packages/kafka/consumer/fetcher.py", line 1070, in _deserialize
+    return f(bytes_)
+           ^^^^^^^^^
+  File "/opt/airflow/dags/fraud_detection_training.py", line 113, in <lambda>
+    value_deserializer=lambda x: json.loads(x.decode('utf-8')),
+                                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/json/__init__.py", line 346, in loads
+    return _default_decoder.decode(s)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/json/decoder.py", line 338, in decode
+    obj, end = self.raw_decode(s, idx=_w(s, 0).end())
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/json/decoder.py", line 356, in raw_decode
+    raise JSONDecodeError("Expecting value", s, err.value) from None
+json.decoder.JSONDecodeError: Expecting value: line 1 column 1 (char 0)
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/home/airflow/.local/lib/python3.12/site-packages/airflow/task/task_runner/standard_task_runner.py", line 117, in _start_by_fork
+    ret = args.func(args, dag=self.dag)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/airflow/.local/lib/python3.12/site-packages/airflow/cli/cli_config.py", line 49, in command
+    return func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "/home/airflow/.local/lib/python3.12/site-packages/airflow/utils/cli.py", line 116, in wrapper
+    return f(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^
+  File "/home/airflow/.local/lib/python3.12/site-packages/airflow/cli/commands/task_command.py", line 483, in task_run
+    task_return_code = _run_task_by_selected_method(args, _dag, ti)
+                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/airflow/.local/lib/python3.12/site-packages/airflow/cli/commands/task_command.py", line 256, in _run_task_by_selected_method
+    return _run_raw_task(args, ti)
+           ^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/airflow/.local/lib/python3.12/site-packages/airflow/cli/commands/task_command.py", line 341, in _run_raw_task
+    return ti._run_raw_task(
+           ^^^^^^^^^^^^^^^^^
+  File "/home/airflow/.local/lib/python3.12/site-packages/airflow/utils/session.py", line 97, in wrapper
+    return func(*args, session=session, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/airflow/.local/lib/python3.12/site-packages/airflow/models/taskinstance.py", line 3006, in _run_raw_task
+    return _run_raw_task(
+           ^^^^^^^^^^^^^^
+  File "/home/airflow/.local/lib/python3.12/site-packages/airflow/models/taskinstance.py", line 274, in _run_raw_task
+    TaskInstance._execute_task_with_callbacks(
+  File "/home/airflow/.local/lib/python3.12/site-packages/airflow/models/taskinstance.py", line 3161, in _execute_task_with_callbacks
+    result = self._execute_task(context, task_orig)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/airflow/.local/lib/python3.12/site-packages/airflow/models/taskinstance.py", line 3185, in _execute_task
+    return _execute_task(self, context, task_orig)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/airflow/.local/lib/python3.12/site-packages/airflow/models/taskinstance.py", line 768, in _execute_task
+    result = _execute_callable(context=context, **execute_callable_kwargs)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/airflow/.local/lib/python3.12/site-packages/airflow/models/taskinstance.py", line 734, in _execute_callable
+    return ExecutionCallableRunner(
+           ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/airflow/.local/lib/python3.12/site-packages/airflow/utils/operator_helpers.py", line 252, in run
+    return self.func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/airflow/.local/lib/python3.12/site-packages/airflow/models/baseoperator.py", line 424, in wrapper
+    return func(self, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/airflow/.local/lib/python3.12/site-packages/airflow/operators/python.py", line 238, in execute
+    return_value = self.execute_callable()
+                   ^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/airflow/.local/lib/python3.12/site-packages/airflow/operators/python.py", line 256, in execute_callable
+    return runner.run(*self.op_args, **self.op_kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/airflow/.local/lib/python3.12/site-packages/airflow/utils/operator_helpers.py", line 252, in run
+    return self.func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/airflow/dags/fraud_detection_training_dag.py", line 29, in _train_model
+    raise AirflowException(f"Model Training failed: {str(e)}")
+airflow.exceptions.AirflowException: Model Training failed: Expecting value: line 1 column 1 (char 0)
+[2025-07-27T08:15:46.561+0000] {local_task_job_runner.py:266} INFO - Task exited with return code 1
+[2025-07-27T08:15:46.581+0000] {taskinstance.py:3901} INFO - 1 downstream tasks scheduled from follow-on schedule check
+[2025-07-27T08:15:46.583+0000] {local_task_job_runner.py:245} INFO - ::endgroup::

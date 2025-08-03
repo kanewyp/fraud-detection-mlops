@@ -1,0 +1,170 @@
+[2025-07-27T08:05:59.674+0000] {local_task_job_runner.py:123} INFO - ::group::Pre task execution logs
+[2025-07-27T08:05:59.689+0000] {taskinstance.py:2614} INFO - Dependencies all met for dep_context=non-requeueable deps ti=<TaskInstance: fraud_detection_training.execute_training manual__2025-07-27T08:05:57.715868+00:00 [queued]>
+[2025-07-27T08:05:59.695+0000] {taskinstance.py:2614} INFO - Dependencies all met for dep_context=requeueable deps ti=<TaskInstance: fraud_detection_training.execute_training manual__2025-07-27T08:05:57.715868+00:00 [queued]>
+[2025-07-27T08:05:59.696+0000] {taskinstance.py:2867} INFO - Starting attempt 1 of 1
+[2025-07-27T08:05:59.706+0000] {taskinstance.py:2890} INFO - Executing <Task(PythonOperator): execute_training> on 2025-07-27 08:05:57.715868+00:00
+[2025-07-27T08:05:59.711+0000] {warnings.py:112} WARNING - /home/***/.local/lib/python3.12/site-packages/***/task/task_runner/standard_task_runner.py:70: DeprecationWarning: This process (pid=282) is multi-threaded, use of fork() may lead to deadlocks in the child.
+  pid = os.fork()
+
+[2025-07-27T08:05:59.713+0000] {standard_task_runner.py:72} INFO - Started process 283 to run task
+[2025-07-27T08:05:59.712+0000] {standard_task_runner.py:104} INFO - Running: ['***', 'tasks', 'run', 'fraud_detection_training', 'execute_training', 'manual__2025-07-27T08:05:57.715868+00:00', '--job-id', '52', '--raw', '--subdir', 'DAGS_FOLDER/fraud_detection_training_dag.py', '--cfg-path', '/tmp/tmpsrjhsi9y']
+[2025-07-27T08:05:59.713+0000] {standard_task_runner.py:105} INFO - Job 52: Subtask execute_training
+[2025-07-27T08:05:59.747+0000] {task_command.py:467} INFO - Running <TaskInstance: fraud_detection_training.execute_training manual__2025-07-27T08:05:57.715868+00:00 [running]> on host ff2b233a1e22
+[2025-07-27T08:05:59.850+0000] {taskinstance.py:3134} INFO - Exporting env vars: AIRFLOW_CTX_DAG_OWNER='kanewyp' AIRFLOW_CTX_DAG_ID='fraud_detection_training' AIRFLOW_CTX_TASK_ID='execute_training' AIRFLOW_CTX_EXECUTION_DATE='2025-07-27T08:05:57.715868+00:00' AIRFLOW_CTX_TRY_NUMBER='1' AIRFLOW_CTX_DAG_RUN_ID='manual__2025-07-27T08:05:57.715868+00:00'
+[2025-07-27T08:05:59.851+0000] {taskinstance.py:732} INFO - ::endgroup::
+[2025-07-27T08:06:04.454+0000] {fraud_detection_training_dag.py:22} INFO - Initializing Fraud Detection Training
+[2025-07-27T08:06:04.464+0000] {fraud_detection_training.py:62} INFO - Configuration loaded successfully
+[2025-07-27T08:06:05.386+0000] {fraud_detection_training.py:88} INFO - Connected to MinIO. Available buckets: mlflow
+[2025-07-27T08:06:06.545+0000] {fraud_detection_training.py:182} INFO - Starting model training process...
+[2025-07-27T08:06:06.546+0000] {fraud_detection_training.py:104} INFO - Reading data from Kafka topic: transactions
+[2025-07-27T08:06:06.645+0000] {conn.py:396} INFO - <BrokerConnection client_id=kafka-python-2.2.15, node_id=bootstrap-0 host=pkc-ldvj1.ap-southeast-2.aws.confluent.cloud:9092 <connecting> [IPv4 ('52.64.27.176', 9092)]>: connecting to pkc-ldvj1.ap-southeast-2.aws.confluent.cloud:9092 [('52.64.27.176', 9092) IPv4]
+[2025-07-27T08:06:06.685+0000] {conn.py:497} INFO - <BrokerConnection client_id=kafka-python-2.2.15, node_id=bootstrap-0 host=pkc-ldvj1.ap-southeast-2.aws.confluent.cloud:9092 <handshake> [IPv4 ('52.64.27.176', 9092)]>: Loading system default SSL CAs from ('/usr/lib/ssl/cert.pem', '/usr/lib/ssl/certs', 'SSL_CERT_FILE', '/usr/lib/ssl/cert.pem', 'SSL_CERT_DIR', '/usr/lib/ssl/certs')
+[2025-07-27T08:06:06.850+0000] {conn.py:618} INFO - <BrokerConnection client_id=kafka-python-2.2.15, node_id=bootstrap-0 host=pkc-ldvj1.ap-southeast-2.aws.confluent.cloud:9092 <checking_api_versions_recv> [IPv4 ('52.64.27.176', 9092)]>: Broker version identified as 2.6
+[2025-07-27T08:06:07.008+0000] {conn.py:822} INFO - <BrokerConnection client_id=kafka-python-2.2.15, node_id=bootstrap-0 host=pkc-ldvj1.ap-southeast-2.aws.confluent.cloud:9092 <authenticating> [IPv4 ('52.64.27.176', 9092)]>: Authenticated as KQIWVOLDBVJZDLTP via SASL / Plain
+[2025-07-27T08:06:07.009+0000] {conn.py:467} INFO - <BrokerConnection client_id=kafka-python-2.2.15, node_id=bootstrap-0 host=pkc-ldvj1.ap-southeast-2.aws.confluent.cloud:9092 <connected> [IPv4 ('52.64.27.176', 9092)]>: Connection complete.
+[2025-07-27T08:06:07.010+0000] {consumer.py:120} WARNING - group_id is None: disabling auto-commit.
+[2025-07-27T08:06:07.011+0000] {subscription_state.py:181} INFO - Updating subscribed topics to: ('transactions',)
+[2025-07-27T08:06:07.011+0000] {fraud_detection_training.py:135} ERROR - Failed to read data from Kafka: cannot access local variable 'messages' where it is not associated with a value
+Traceback (most recent call last):
+  File "/opt/airflow/dags/fraud_detection_training.py", line 117, in _read_data_from_kafka
+    print(messages)
+          ^^^^^^^^
+UnboundLocalError: cannot access local variable 'messages' where it is not associated with a value
+[2025-07-27T08:06:07.015+0000] {fraud_detection_training.py:337} ERROR - Training failed: cannot access local variable 'messages' where it is not associated with a value
+Traceback (most recent call last):
+  File "/opt/airflow/dags/fraud_detection_training.py", line 185, in train_model
+    df = self._read_data_from_kafka()
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/airflow/dags/fraud_detection_training.py", line 117, in _read_data_from_kafka
+    print(messages)
+          ^^^^^^^^
+UnboundLocalError: cannot access local variable 'messages' where it is not associated with a value
+[2025-07-27T08:06:07.017+0000] {fraud_detection_training_dag.py:28} ERROR - Training failed: cannot access local variable 'messages' where it is not associated with a value
+Traceback (most recent call last):
+  File "/opt/airflow/dags/fraud_detection_training_dag.py", line 24, in _train_model
+    model, precision = trainer.train_model()
+                       ^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/airflow/dags/fraud_detection_training.py", line 185, in train_model
+    df = self._read_data_from_kafka()
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/airflow/dags/fraud_detection_training.py", line 117, in _read_data_from_kafka
+    print(messages)
+          ^^^^^^^^
+UnboundLocalError: cannot access local variable 'messages' where it is not associated with a value
+[2025-07-27T08:06:07.040+0000] {taskinstance.py:3313} ERROR - Task failed with exception
+Traceback (most recent call last):
+  File "/opt/airflow/dags/fraud_detection_training_dag.py", line 24, in _train_model
+    model, precision = trainer.train_model()
+                       ^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/airflow/dags/fraud_detection_training.py", line 185, in train_model
+    df = self._read_data_from_kafka()
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/airflow/dags/fraud_detection_training.py", line 117, in _read_data_from_kafka
+    print(messages)
+          ^^^^^^^^
+UnboundLocalError: cannot access local variable 'messages' where it is not associated with a value
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/home/airflow/.local/lib/python3.12/site-packages/airflow/models/taskinstance.py", line 768, in _execute_task
+    result = _execute_callable(context=context, **execute_callable_kwargs)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/airflow/.local/lib/python3.12/site-packages/airflow/models/taskinstance.py", line 734, in _execute_callable
+    return ExecutionCallableRunner(
+           ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/airflow/.local/lib/python3.12/site-packages/airflow/utils/operator_helpers.py", line 252, in run
+    return self.func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/airflow/.local/lib/python3.12/site-packages/airflow/models/baseoperator.py", line 424, in wrapper
+    return func(self, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/airflow/.local/lib/python3.12/site-packages/airflow/operators/python.py", line 238, in execute
+    return_value = self.execute_callable()
+                   ^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/airflow/.local/lib/python3.12/site-packages/airflow/operators/python.py", line 256, in execute_callable
+    return runner.run(*self.op_args, **self.op_kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/airflow/.local/lib/python3.12/site-packages/airflow/utils/operator_helpers.py", line 252, in run
+    return self.func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/airflow/dags/fraud_detection_training_dag.py", line 29, in _train_model
+    raise AirflowException(f"Model Training failed: {str(e)}")
+airflow.exceptions.AirflowException: Model Training failed: cannot access local variable 'messages' where it is not associated with a value
+[2025-07-27T08:06:07.051+0000] {taskinstance.py:1226} INFO - Marking task as FAILED. dag_id=fraud_detection_training, task_id=execute_training, run_id=manual__2025-07-27T08:05:57.715868+00:00, execution_date=20250727T080557, start_date=20250727T080559, end_date=20250727T080607
+[2025-07-27T08:06:07.088+0000] {taskinstance.py:341} INFO - ::group::Post task execution logs
+[2025-07-27T08:06:07.088+0000] {standard_task_runner.py:124} ERROR - Failed to execute job 52 for task execute_training (Model Training failed: cannot access local variable 'messages' where it is not associated with a value; 283)
+Traceback (most recent call last):
+  File "/opt/airflow/dags/fraud_detection_training_dag.py", line 24, in _train_model
+    model, precision = trainer.train_model()
+                       ^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/airflow/dags/fraud_detection_training.py", line 185, in train_model
+    df = self._read_data_from_kafka()
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/airflow/dags/fraud_detection_training.py", line 117, in _read_data_from_kafka
+    print(messages)
+          ^^^^^^^^
+UnboundLocalError: cannot access local variable 'messages' where it is not associated with a value
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/home/airflow/.local/lib/python3.12/site-packages/airflow/task/task_runner/standard_task_runner.py", line 117, in _start_by_fork
+    ret = args.func(args, dag=self.dag)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/airflow/.local/lib/python3.12/site-packages/airflow/cli/cli_config.py", line 49, in command
+    return func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "/home/airflow/.local/lib/python3.12/site-packages/airflow/utils/cli.py", line 116, in wrapper
+    return f(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^
+  File "/home/airflow/.local/lib/python3.12/site-packages/airflow/cli/commands/task_command.py", line 483, in task_run
+    task_return_code = _run_task_by_selected_method(args, _dag, ti)
+                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/airflow/.local/lib/python3.12/site-packages/airflow/cli/commands/task_command.py", line 256, in _run_task_by_selected_method
+    return _run_raw_task(args, ti)
+           ^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/airflow/.local/lib/python3.12/site-packages/airflow/cli/commands/task_command.py", line 341, in _run_raw_task
+    return ti._run_raw_task(
+           ^^^^^^^^^^^^^^^^^
+  File "/home/airflow/.local/lib/python3.12/site-packages/airflow/utils/session.py", line 97, in wrapper
+    return func(*args, session=session, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/airflow/.local/lib/python3.12/site-packages/airflow/models/taskinstance.py", line 3006, in _run_raw_task
+    return _run_raw_task(
+           ^^^^^^^^^^^^^^
+  File "/home/airflow/.local/lib/python3.12/site-packages/airflow/models/taskinstance.py", line 274, in _run_raw_task
+    TaskInstance._execute_task_with_callbacks(
+  File "/home/airflow/.local/lib/python3.12/site-packages/airflow/models/taskinstance.py", line 3161, in _execute_task_with_callbacks
+    result = self._execute_task(context, task_orig)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/airflow/.local/lib/python3.12/site-packages/airflow/models/taskinstance.py", line 3185, in _execute_task
+    return _execute_task(self, context, task_orig)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/airflow/.local/lib/python3.12/site-packages/airflow/models/taskinstance.py", line 768, in _execute_task
+    result = _execute_callable(context=context, **execute_callable_kwargs)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/airflow/.local/lib/python3.12/site-packages/airflow/models/taskinstance.py", line 734, in _execute_callable
+    return ExecutionCallableRunner(
+           ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/airflow/.local/lib/python3.12/site-packages/airflow/utils/operator_helpers.py", line 252, in run
+    return self.func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/airflow/.local/lib/python3.12/site-packages/airflow/models/baseoperator.py", line 424, in wrapper
+    return func(self, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/airflow/.local/lib/python3.12/site-packages/airflow/operators/python.py", line 238, in execute
+    return_value = self.execute_callable()
+                   ^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/airflow/.local/lib/python3.12/site-packages/airflow/operators/python.py", line 256, in execute_callable
+    return runner.run(*self.op_args, **self.op_kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/airflow/.local/lib/python3.12/site-packages/airflow/utils/operator_helpers.py", line 252, in run
+    return self.func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/airflow/dags/fraud_detection_training_dag.py", line 29, in _train_model
+    raise AirflowException(f"Model Training failed: {str(e)}")
+airflow.exceptions.AirflowException: Model Training failed: cannot access local variable 'messages' where it is not associated with a value
+[2025-07-27T08:06:07.157+0000] {local_task_job_runner.py:266} INFO - Task exited with return code 1
+[2025-07-27T08:06:07.194+0000] {taskinstance.py:3901} INFO - 1 downstream tasks scheduled from follow-on schedule check
+[2025-07-27T08:06:07.197+0000] {local_task_job_runner.py:245} INFO - ::endgroup::
