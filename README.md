@@ -1,30 +1,14 @@
 # Fraud Detection MLOps Pipeline
-
-A complete MLOps solution for real-time fraud detection, integrating data ingestion, model training, and inference with Kafka, Airflow, and MLflow.
+A E2E MLOps solution for real-time fraud detection
 
 ## Overview
 
 This project implements an end-to-end MLOps pipeline for fraud detection that features:
-- Real-time data streaming with Apache Kafka
-- Automated model training with Apache Airflow
-- Experiment tracking with MLflow
-- Real-time inference with PySpark
+- Real-time data streaming
+- Automated model training
+- Experiment tracking
+- Real-time inference
 - Support for multiple ML frameworks (XGBoost, LightGBM, CATBoost)
-
-## Features
-
-- **Data Pipeline**: Kafka streaming, Airflow orchestration, SMOTE class balancing
-- **Machine Learning**: Multi-framework support, hyperparameter tuning, experiment tracking
-- **Real-time Inference**: PySpark streaming, automated deployment, result streaming
-
-## Technology Stack
-
-- **Orchestration**: Apache Airflow
-- **Streaming**: Confluent Kafka, PySpark  
-- **ML Frameworks**: XGBoost, LightGBM, CATBoost
-- **Experiment Tracking**: MLflow
-- **Containerization**: Docker, Docker Compose
-- **Language**: Python 3.10+
 
 ## Quick Start
 
