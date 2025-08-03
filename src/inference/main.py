@@ -7,7 +7,6 @@ from pyspark.sql.types import StructType, StructField, StringType, IntegerType, 
 from pyspark.sql.functions import from_json, col, hour, dayofweek, lit, pandas_udf, coalesce, PandasUDFType
 import pandas as pd
 
-
 import logging
 
 logging.basicConfig(

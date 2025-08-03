@@ -8,8 +8,8 @@ mlflow:
 
 kafka:
   bootstrap_servers: "pkc-ldvj1.ap-southeast-2.aws.confluent.cloud:9092"
-  username: ""
-  password: ""
+  username: "" #input_your_username
+  password: "" #input_your_password
   topic: "transactions"
   output_topic: "fraud_predictions"
   security_protocol: 'SASL_SSL'
