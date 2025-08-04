@@ -2,9 +2,9 @@ import os
 from pyspark.sql import SparkSession
 from dotenv import load_dotenv
 import yaml
-import pickle
+import joblib
 from pyspark.sql.types import StructType, StructField, StringType, IntegerType, FloatType, TimestampType
-from pyspark.sql.functions import from_json, col, hour, dayofweek, lit, pandas_udf, coalesce, PandasUDFType
+from pyspark.sql.functions import from_json, col, hour, dayofweek, when, lit, pandas_udf, coalesce, PandasUDFType
 import pandas as pd
 
 import logging
@@ -34,10 +34,21 @@ class FraudDetectionInference:
 
     def _load_model(self, model_path):
         try:
-            with open(model_path, 'r') as f:
-                model = pickle.load(f)
-                logger.info(f"Model loaded successfully from {model_path}")
+            # Try loading with joblib first (recommended for sklearn models)
+            try:
+                model = joblib.load(model_path)
+                logger.info(f"Model loaded successfully with joblib from {model_path}")
                 return model
+            except Exception as joblib_error:
+                logger.warning(f"Failed to load with joblib: {joblib_error}")
+                
+                # Fallback to pickle with protocol handling
+                import pickle
+                with open(model_path, 'rb') as f:
+                    model = pickle.load(f)
+                    logger.info(f"Model loaded successfully with pickle from {model_path}")
+                    return model
+                    
         except Exception as e:
             logger.error(f"Error loading model from {model_path}: {e}")
             raise
@@ -113,8 +124,8 @@ class FraudDetectionInference:
 
     def add_features(self, df):
         df = df.withColumn('transaction_hour', hour(col('timestamp')))
-        df = df.withColumn('is_weekend', dayofweek(col('timestamp'))==1 | (dayofweek(col('timestamp'))==7).cast(int))
-        df = df.withColumn('is_night', (col('transaction_hour') < 5) | (col('transaction_hour') >= 22).cast(int))
+        df = df.withColumn('is_weekend',when((dayofweek(col('timestamp')) == 1) | (dayofweek(col('timestamp')) == 7), 1).otherwise(0))
+        df = df.withColumn('is_night',when((col('transaction_hour') < 5) | (col('transaction_hour') >= 22), 1).otherwise(0))
         df = df.withColumn('transaction_day', dayofweek(col('timestamp')))
         df = df.withColumn('time_since_last_transaction',lit(0.0))
         df = df.withColumn("user_activity_24h", lit(1000))
@@ -176,7 +187,7 @@ class FraudDetectionInference:
         prediction_df = df.withColumn('prediction', predict_udf(
             *[col(f) for f in [
                 "user_id", "amount", "currency", "transaction_hour",
-                "is_weekend", "time_since_last_transactions", "merchant_risk",
+                "is_weekend", "time_since_last_transaction", "merchant_risk",
                 "amount_to_avg_ratio", "is_night", "transaction_day",
                 "user_activity_24h", "merchant"
             ]]

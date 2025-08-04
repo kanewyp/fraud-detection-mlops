@@ -4,6 +4,11 @@ FROM apache/airflow:2.10.5
 USER root
 RUN mkdir -p /app/models
 
+# Install system dependencies required by LightGBM
+RUN apt-get update && apt-get install -y \
+    libgomp1 \
+    && rm -rf /var/lib/apt/lists/*
+
 USER airflow
 # copy requirement file
 COPY requirements.txt /app/requirements.txt

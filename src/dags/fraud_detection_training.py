@@ -11,6 +11,8 @@ from sklearn.model_selection import train_test_split
 from sklearn.compose import ColumnTransformer
 from sklearn.preprocessing import OrdinalEncoder
 from xgboost import XGBClassifier
+from catboost import CatBoostClassifier
+from lightgbm import LGBMClassifier
 from imblearn.pipeline import Pipeline as ImbPipeline
 from imblearn.over_sampling import SMOTE
 from sklearn.model_selection import RandomizedSearchCV, StratifiedKFold, train_test_split
@@ -174,6 +176,69 @@ class FraudDetectionTraining:
         return df[features_col + ['is_fraud']]
         
 
+    def _create_model(self):
+        """Create model based on framework specified in config"""
+        framework = self.config['model']['framework'].lower()
+        seed = self.config['model'].get('seed', 42)
+
+        print("The model chosen for training is: ", framework)
+        
+        if framework == 'xgboost':
+            params = self.config['model']['xgboost_params'].copy()
+            params['eval_metric'] = 'aucpr'
+            params['random_state'] = seed
+            params['reg_lambda'] = 1.0
+            return XGBClassifier(**params)
+            
+        elif framework == 'catboost':
+            params = self.config['model']['catboost_params'].copy()
+            params['random_state'] = seed
+            params['verbose'] = False
+            params['eval_metric'] = 'AUC'
+            return CatBoostClassifier(**params)
+            
+        elif framework == 'lightgbm':
+            params = self.config['model']['lightgbm_params'].copy()
+            params['random_state'] = seed
+            params['objective'] = 'binary'
+            params['metric'] = 'auc'
+            params['verbose'] = -1
+            return LGBMClassifier(**params)
+            
+        else:
+            raise ValueError(f"Unsupported framework: {framework}. Choose from: xgboost, catboost, lightgbm")
+
+
+    def _get_param_grid(self):
+        """Get hyperparameter grid based on framework"""
+        framework = self.config['model']['framework'].lower()
+        
+        if framework == 'xgboost':
+            return {
+                'classifier__max_depth': [3, 5, 7],
+                'classifier__learning_rate': [0.01, 0.05, 0.1],
+                'classifier__subsample': [0.6, 0.8, 1.0],
+                'classifier__colsample_bytree': [0.6, 0.8, 1.0],
+                'classifier__gamma': [0, 0.1, 0.3],
+                'classifier__reg_alpha': [0, 0.1, 0.5]
+            }
+        elif framework == 'catboost':
+            return {
+                'classifier__depth': [4, 6, 8],
+                'classifier__learning_rate': [0.01, 0.05, 0.1],
+                'classifier__l2_leaf_reg': [1, 3, 5],
+                'classifier__border_count': [32, 64, 128]
+            }
+        elif framework == 'lightgbm':
+            return {
+                'classifier__max_depth': [3, 5, 7],
+                'classifier__learning_rate': [0.01, 0.05, 0.1],
+                'classifier__num_leaves': [31, 50, 100],
+                'classifier__subsample': [0.6, 0.8, 1.0],
+                'classifier__colsample_bytree': [0.6, 0.8, 1.0]
+            }
+        
+
     def train_model(self):
         # extract data from Kafka,
         # feature engineering
@@ -223,30 +288,22 @@ class FraudDetectionTraining:
                     remainder='passthrough'
                 )
 
-                xgb = XGBClassifier(
-                    eval_metric='aucpr',
-                    random_state=self.config['model'].get('seed', 42),
-                    reg_lambda=1.0, # reglarization parameter
-                    n_estimators=self.config['model']['params']['n_estimators'],
-                    tree_method=self.config['model'].get('tree_method', 'hist')
-                )
+                # Create model based on framework
+                model = self._create_model()
+                framework = self.config['model']['framework'].lower()
+                
+                logger.info(f"Training with {framework} framework")
 
                 # ----- pipeline construction -----
                 # # preprocessing
                 pipeline = ImbPipeline([
                     ('preprocessor', preprocessor),
                     ('smote', SMOTE(random_state=self.config['model'].get('seed', 42))),
-                    ('classifier', xgb)
+                    ('classifier', model)
                 ], memory='./cache/')
 
-                param_dist = {
-                    'classifier__max_depth': [3, 5, 7], # maximum depth of a tree
-                    'classifier__learning_rate': [0.01, 0.05, 0.1], # learning rate for boosting
-                    'classifier__subsample': [0.6, 0.8, 1.0], # fraction of samples to use for each tree
-                    'classifier__colsample_bytree': [0.6, 0.8, 1.0], # fraction of features to use for each tree
-                    'classifier__gamma': [0, 0.1, 0.3], # minimum loss reduction required to make a further partition
-                    'classifier__reg_alpha': [0, 0.1, 0.5] # regularization term on weights
-                }
+                # Get framework-specific parameter grid
+                param_dist = self._get_param_grid()
 
                 searcher = RandomizedSearchCV(
                     pipeline,
@@ -322,12 +379,19 @@ class FraudDetectionTraining:
                 plt.close()
 
                 signature = infer_signature(X_train, Y_pred)
+                
+                # Include framework in model name
+                model_name = f"fraud_detection_{framework}_model"
+                
                 mlflow.sklearn.log_model(
                     sk_model=best_model,
                     artifact_path='model',
                     signature=signature,
-                    registered_model_name='fraud_detection_model'
+                    registered_model_name=model_name
                 )
+
+                # Log framework info
+                mlflow.log_param('framework', framework)
 
                 os.makedirs('model', exist_ok=True)
                 joblib.dump(best_model, '/app/models/fraud_detection_model.pkl')

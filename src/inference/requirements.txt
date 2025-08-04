@@ -2,7 +2,13 @@ mlflow
 pyspark
 python-dotenv
 xgboost
+catboost
+lightgbm
 grpcio>=1.48.0
 googleapis-common-protos>=1.56.2
 imblearn
 scikit-learn
+joblib
+pandas
+pyyaml
+dill
