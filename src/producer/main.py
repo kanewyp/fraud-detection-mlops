@@ -7,6 +7,7 @@ import random
 import signal
 import time
 import json
+import decimal
 from typing import Dict, Any, Optional
 from jsonschema import validate, ValidationError, FormatChecker
 from datetime import datetime, timedelta, timezone
@@ -21,6 +22,17 @@ logger = logging.getLogger(__name__)
 load_dotenv(dotenv_path="/app/.env")
 
 fake = Faker()
+
+def convert_decimals_to_float(obj):
+    """Convert Decimal objects to float for JSON serialization"""
+    if isinstance(obj, dict):
+        return {k: convert_decimals_to_float(v) for k, v in obj.items()}
+    elif isinstance(obj, list):
+        return [convert_decimals_to_float(i) for i in obj]
+    elif isinstance(obj, decimal.Decimal):
+        return float(obj)
+    else:
+        return obj
 
 TRANSACTION_SCHEMA = {
     "type": "object",
@@ -46,7 +58,7 @@ TRANSACTION_SCHEMA = {
         "card_type": {"type": "string"},
         "card_brand": {"type": "string"},
         "card_exp_month": {"type": "integer", "minimum": 1, "maximum": 12},
-        "card_exp_year": {"type": "integer", "minimum": 2024, "maximum": 2035},
+        "card_exp_year": {"type": "integer", "minimum": 2022, "maximum": 2035},
         "cvv_verified": {"type": "boolean"},
         "zip_verified": {"type": "boolean"},
         "address_verified": {"type": "boolean"},
@@ -57,11 +69,55 @@ TRANSACTION_SCHEMA = {
 
 
 class TransactionProducer():
+    """
+    Enhanced Credit Card Transaction Producer with Realistic Fraud Patterns
+    
+    Implements 6 distinct fraud patterns based on real-world credit card fraud scenarios:
+    
+    1. ACCOUNT/CARD TAKEOVER (25% of fraud):
+       - Uses compromised user accounts or stolen card numbers
+       - High-value transactions ($500-$3000)
+       - Often from high-risk merchants
+       - Online entry mode, CVV verification fails
+       - Originates from high-risk countries (RU, CN, NG)
+    
+    2. CARD TESTING (20% of fraud):
+       - Small-value transactions to test stolen card validity
+       - Amounts under $5 (typically $0.01-$4.99)
+       - Online merchants, verification failures
+       - Precursor to larger fraudulent transactions
+    
+    3. MERCHANT COLLUSION (15% of fraud):
+       - Fraudulent merchants processing fake transactions
+       - High-value amounts ($1000-$2500)
+       - Uses legitimate-appearing verification (CVV passes)
+       - Physical entry modes (CHIP/SWIPE) to appear normal
+    
+    4. GEOGRAPHIC ANOMALY (15% of fraud):
+       - Transactions from unusual/high-risk locations
+       - Countries: RU, CN, NG, PK (high fraud rates)
+       - Online transactions, address verification fails
+       - Medium amounts ($200-$1500)
+    
+    5. EXPIRED CARD USAGE (10% of fraud):
+       - Using cards past expiration date
+       - Manual entry mode (bypassing chip validation)
+       - CVV verification typically fails
+       - Various transaction amounts
+    
+    6. VERIFICATION FAILURES (15% of fraud):
+       - All verification checks fail (CVV, ZIP, Address)
+       - Online transactions (easier to bypass checks)
+       - Medium amounts ($100-$800)
+       - Often automated fraud attempts
+    
+    Target fraud rate: 0.5% ± 0.05% with dynamic adjustment
+    """
     def __init__(self):
         self.bootstrap_servers = os.getenv("KAFKA_BOOTSTRAP_SERVERS")
         self.kafka_username= os.getenv("KAFKA_USERNAME")
         self.kafka_password = os.getenv("KAFKA_PASSWORD")
-        self.topic = os.getenv("KAFKA_TOPIC", "transactions")
+        self.topic = os.getenv("KAFKA_TOPIC", "transactions_v2")
         self.running = False # Flag to control the production loop
         
         # Confluent Kafka configuration
@@ -116,6 +172,13 @@ class TransactionProducer():
         for user_id in range(1000, 9999):
             num_cards = random.choices([1, 2, 3, 4], weights=[0.6, 0.25, 0.1, 0.05])[0]
             self.user_cards[user_id] = [fake.credit_card_number() for _ in range(num_cards)]
+        
+        # Fraud rate monitoring
+        self.total_transactions = 0
+        self.fraud_transactions = 0
+        self.target_fraud_rate = 0.005  # 0.5%
+        self.fraud_rate_tolerance = 0.0005  # ±0.05%
+        
         self.fraud_pattern_weights = {
             'account_takeover': 0.25,  # 25% of fraudulent transactions
             'card_testing': 0.20,  # 20% of fraudulent transactions
@@ -137,6 +200,34 @@ class TransactionProducer():
         else:
             logger.info(f"Message delivered to {msg.topic()} [{msg.partition()}] at offset {msg.offset()}")
 
+
+    def get_fraud_statistics(self) -> Dict[str, Any]:
+        """Get current fraud rate statistics"""
+        if self.total_transactions == 0:
+            return {
+                'total_transactions': 0,
+                'fraud_transactions': 0,
+                'fraud_rate_percent': 0.0,
+                'target_rate_percent': self.target_fraud_rate * 100,
+                'within_tolerance': True
+            }
+        
+        current_fraud_rate = self.fraud_transactions / self.total_transactions
+        fraud_rate_percent = current_fraud_rate * 100
+        target_percent = self.target_fraud_rate * 100
+        tolerance_percent = self.fraud_rate_tolerance * 100
+        
+        within_tolerance = abs(current_fraud_rate - self.target_fraud_rate) <= self.fraud_rate_tolerance
+        
+        return {
+            'total_transactions': self.total_transactions,
+            'fraud_transactions': self.fraud_transactions,
+            'fraud_rate_percent': round(fraud_rate_percent, 3),
+            'target_rate_percent': round(target_percent, 1),
+            'tolerance_percent': round(tolerance_percent, 1),
+            'within_tolerance': within_tolerance,
+            'fraud_patterns': dict(self.fraud_pattern_weights)
+        }
 
     def validate_transaction(self, transaction: Dict[str, Any]) -> bool:
         try:
@@ -181,7 +272,7 @@ class TransactionProducer():
             'card_type': random.choice(self.card_types),
             'card_brand': random.choice(self.card_brands),
             'card_exp_month': random.randint(1, 12),
-            'card_exp_year': random.randint(2024, 2030),
+            'card_exp_year': random.randint(2024, 2035),
             'cvv_verified': random.choice([True, False]),
             'zip_verified': random.choice([True, False]), 
             'address_verified': random.choice([True, False]),
@@ -191,19 +282,35 @@ class TransactionProducer():
         is_fraud = 0
         amount = transaction['amount']
 
-        # FRAUD PATTERN 1: Account/Card takeover
-        if (user_id in self.compromised_users or card_id in self.compromised_cards) and amount > 300:
-            if random.random() < self.fraud_pattern_weights['account_takeover']:
-                is_fraud = 1
-                transaction['amount'] = random.uniform(500, 3000)  # High value transaction
-                transaction['merchant'] = random.choice(self.high_risk_merchants)
-                transaction['entry_mode'] = 'ONLINE'  # Likely online fraud
-                transaction['cvv_verified'] = False  # CVV not verified
-                transaction['location'] = random.choice(['RU', 'CN', 'NG'])  # High-risk countries
-
-        # FRAUD PATTERN 2: Card testing (small amounts)
-        if not is_fraud and amount < 5.0:
-            if user_id % 1000 == 0 and random.random() < self.fraud_pattern_weights['card_testing']:
+        # First, determine if this transaction should be fraudulent (target 1.5% fraud rate)
+        base_fraud_probability = self.target_fraud_rate
+        
+        # Adjust fraud probability based on current fraud rate
+        if self.total_transactions > 100:  # Only adjust after some transactions
+            current_fraud_rate = self.fraud_transactions / self.total_transactions
+            if current_fraud_rate > (self.target_fraud_rate + self.fraud_rate_tolerance):
+                base_fraud_probability = max(0.0045, self.target_fraud_rate - 0.0005)  # Reduce fraud
+            elif current_fraud_rate < (self.target_fraud_rate - self.fraud_rate_tolerance):
+                base_fraud_probability = min(0.0055, self.target_fraud_rate + 0.0005)  # Increase fraud
+        
+        should_be_fraud = random.random() < base_fraud_probability
+        
+        if should_be_fraud:
+            # Select which fraud pattern to apply
+            pattern_choice = random.random()
+            
+            # FRAUD PATTERN 1: Account/Card Takeover (25%)
+            if pattern_choice < 0.25:
+                if user_id in self.compromised_users or card_id in self.compromised_cards:
+                    is_fraud = 1
+                    transaction['amount'] = round(random.uniform(500, 3000), 2)
+                    transaction['merchant'] = random.choice(self.high_risk_merchants)
+                    transaction['entry_mode'] = 'ONLINE'
+                    transaction['cvv_verified'] = False
+                    transaction['location'] = random.choice(['RU', 'CN', 'NG'])
+                    
+            # FRAUD PATTERN 2: Card Testing (20%)
+            elif pattern_choice < 0.45:
                 is_fraud = 1
                 transaction['amount'] = round(random.uniform(0.01, 4.99), 2)
                 transaction['merchant_category'] = 'online'
@@ -211,45 +318,51 @@ class TransactionProducer():
                 transaction['entry_mode'] = 'ONLINE'
                 transaction['cvv_verified'] = False
                 transaction['zip_verified'] = False
-
-        # FRAUD PATTERN 3: Merchant collusion
-        if not is_fraud and transaction['merchant'] in self.high_risk_merchants:
-            if amount > 1000 and random.random() < self.fraud_pattern_weights['merchant_collusion']:
+                
+            # FRAUD PATTERN 3: Merchant Collusion (15%)
+            elif pattern_choice < 0.60:
                 is_fraud = 1
+                transaction['merchant'] = random.choice(self.high_risk_merchants)
                 transaction['amount'] = round(random.uniform(1000, 2500), 2)
                 transaction['entry_mode'] = random.choice(['CHIP', 'SWIPE'])
                 transaction['cvv_verified'] = True  # Appears legitimate
-
-        # FRAUD PATTERN 4: Geographic anomaly 
-        if not is_fraud and user_id % 500 == 0:
-            if random.random() < self.fraud_pattern_weights['geo_anomaly']:
+                
+            # FRAUD PATTERN 4: Geographic Anomaly (15%)
+            elif pattern_choice < 0.75:
                 is_fraud = 1
                 transaction['location'] = random.choice(['RU', 'CN', 'NG', 'PK'])
                 transaction['entry_mode'] = 'ONLINE'
                 transaction['address_verified'] = False
-                transaction['amount'] = random.uniform(200, 1500)
-
-        # FRAUD PATTERN 5: Expired card usage
-        if not is_fraud and transaction['card_exp_year'] <= 2024:
-            if random.random() < 0.8:  # 80% chance expired cards are fraud
+                transaction['amount'] = round(random.uniform(200, 1500), 2)
+                
+            # FRAUD PATTERN 5: Expired Card Usage (10%)
+            elif pattern_choice < 0.85:
                 is_fraud = 1
+                transaction['card_exp_year'] = random.choice([2022, 2023, 2024])
+                transaction['card_exp_month'] = random.randint(1, 12)
                 transaction['cvv_verified'] = False
                 transaction['entry_mode'] = 'MANUAL'
-
-        # FRAUD PATTERN 6: Multiple verification failures
-        if not is_fraud and not any([transaction['cvv_verified'], transaction['zip_verified'], transaction['address_verified']]):
-            if random.random() < 0.3:  # 30% chance when all verifications fail
+                
+            # FRAUD PATTERN 6: Verification Failures (15%)
+            else:
                 is_fraud = 1
+                transaction['cvv_verified'] = False
+                transaction['zip_verified'] = False
+                transaction['address_verified'] = False
                 transaction['entry_mode'] = 'ONLINE'
-                transaction['amount'] = random.uniform(100, 800)
+                transaction['amount'] = round(random.uniform(100, 800), 2)
 
-        # Baseline random fraud (0.3% of all transactions)
-        if not is_fraud and random.random() < 0.003:
-            is_fraud = 1
-            transaction['amount'] = random.uniform(50, 1000)
-
-        # Final fraud rate control (target 1.5-2.5%)
-        transaction['is_fraud'] = is_fraud if random.random() < 0.975 else 0
+        transaction['is_fraud'] = is_fraud
+        
+        # Update fraud rate tracking
+        self.total_transactions += 1
+        if is_fraud:
+            self.fraud_transactions += 1
+            
+        # Log fraud rate every 1000 transactions
+        if self.total_transactions % 1000 == 0:
+            current_fraud_rate = (self.fraud_transactions / self.total_transactions) * 100
+            logger.info(f"Fraud rate after {self.total_transactions} transactions: {current_fraud_rate:.2f}%")
 
         # Validate enhanced transaction
         if self.validate_transaction(transaction):
@@ -265,10 +378,13 @@ class TransactionProducer():
             if not transaction:
                 return False
             
+            # Convert any Decimal objects to float before JSON serialization
+            transaction_serializable = convert_decimals_to_float(transaction)
+            
             self.producer.produce( # Produce the transaction into Kafka
                 self.topic,
                 key=transaction['transaction_id'],
-                value=json.dumps(transaction),
+                value=json.dumps(transaction_serializable),
                 callback=self.delivery_report
             )
 

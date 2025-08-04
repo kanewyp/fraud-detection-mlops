@@ -1,8 +1,8 @@
 mlflow:
-  experiment_name: "fraud_detection"
-  registered_model_name: "fraud_detection_test_model"
+  experiment_name: "fraud_detection_v2"
+  registered_model_name: "fraud_detection_test_model_v2"
   tracking_uri: "http://mlflow-server:5500"
-  artifact_location: "s3://mlflow/fraud_detection"
+  artifact_location: "s3://mlflow/fraud_detection_v2"
   s3_endpoint_url: "http://minio:9000"
   bucket: "mlflow"
 
@@ -10,24 +10,24 @@ kafka:
   bootstrap_servers: "pkc-ldvj1.ap-southeast-2.aws.confluent.cloud:9092"
   username: "KQIWVOLDBVJZDLTP" #input_your_username
   password: "HqLja+YKhKN3uHwQFF830zUx2430h3OVlYh7pGKyeUZ2qKvtjwjbTrk/2eGcoj2Z" #input_your_password
-  topic: "transactions"
-  output_topic: "fraud_predictions"
+  topic: "transactions_v2"
+  output_topic: "fraud_predictions_v2"
   security_protocol: 'SASL_SSL'
   timeout: 10000
 
 
 spark:
-  app_name: "FraudDetectionInference"
+  app_name: "FraudDetectionInference_v2"
   packages: "org.mlflow:mlflow-spark:2.6.0,com.google.guava:guava:30.1.1-jre,org.apache.spark:spark-sql-kafka-0-10_2.12:3.5.4,org.apache.hadoop:hadoop-aws:3.3.0,com.amazonaws:aws-java-sdk:1.11.469"
   shuffle_partition: 200
   checkpoint_location: 'checkpoints'
 
 
 model:
-  framework: "catboost"  # Options: xgboost, catboost, lightgbm
+  framework: "lightgbm"  # Options: xgboost, catboost, lightgbm
   test_size: 0.2
   seed: 42
-  path: "/app/models/fraud_detection_model.pkl"
+  path: "/app/models/fraud_detection_model_v2.pkl"
   xgboost_params:
     n_estimators: 300
     learning_rate: 0.05
@@ -51,6 +51,6 @@ model:
     colsample_bytree: 0.8
 
 high_risk_merchants: ["QuickCash", "GlobalDigital", "FastMoneyX", "CryptoATM", "OnlineGaming"]
-  path: "/app/models/fraud_detection_model.pkl"
+path: "/app/models/fraud_detection_model_v2.pkl"
 
 

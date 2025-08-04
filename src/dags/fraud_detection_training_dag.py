@@ -29,7 +29,7 @@ def _train_model(**context):
         raise AirflowException(f"Model Training failed: {str(e)}")
 
 with DAG(
-    'fraud_detection_training',
+    'fraud_detection_training_v2',
     default_args=default_args,
     description='Fraud Detection Model Training Pipeline',
     schedule_interval='18 0 * * *',  # Daily at 18:00 UTC

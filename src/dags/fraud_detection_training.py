@@ -30,7 +30,7 @@ logging.basicConfig(
     format='%(asctime)s - %(levelname)s - %(module)s - %(message)s',
     level=logging.INFO,
     handlers=[
-        logging.FileHandler('./fraud_detection_model.log'),
+        logging.FileHandler('./fraud_detection_model_v2.log'),
         logging.StreamHandler()
     ]
 )
@@ -159,15 +159,36 @@ class FraudDetectionTraining:
 
         # ------------------behavioural features-----------------
         # user activity in last 24 hours (rolling count)
-        df['user_activity_24h'] = df.groupby('user_id', group_keys=False).apply(
-            lambda x: x.rolling('24h', on='timestamp', closed='left')['amount'].count().fillna(0)
-        ).astype(int)
+        # Create proper rolling calculations without index conflicts
+        def calculate_user_activity_24h(group):
+            if len(group) == 0:
+                return pd.Series([], dtype=int)
+            group_sorted = group.sort_values('timestamp')
+            group_indexed = group_sorted.set_index('timestamp')
+            rolling_count = group_indexed['amount'].rolling('24H', closed='left').count().fillna(0)
+            # Reindex to match original group order
+            result = rolling_count.reindex(group['timestamp']).fillna(0)
+            return result
+        
+        # Apply the function and flatten the result
+        activity_result = df.groupby('user_id', group_keys=False).apply(calculate_user_activity_24h)
+        df['user_activity_24h'] = activity_result.values.astype(int)
 
         # ------------------monetary features--------------------
         # rolling 7-day average amount per user
-        df['rolling_avg_7d'] = df.groupby('user_id', group_keys=False).apply(
-            lambda x: x['amount'].rolling('7d', on='timestamp', min_periods=1).mean().fillna(1.0)
-        )
+        def calculate_rolling_avg_7d(group):
+            if len(group) == 0:
+                return pd.Series([], dtype=float)
+            group_sorted = group.sort_values('timestamp')
+            group_indexed = group_sorted.set_index('timestamp')
+            rolling_avg = group_indexed['amount'].rolling('7D', min_periods=1, closed='left').mean().fillna(100.0)
+            # Reindex to match original group order
+            result = rolling_avg.reindex(group['timestamp']).fillna(100.0)
+            return result
+            
+        # Apply the function and flatten the result
+        avg_result = df.groupby('user_id', group_keys=False).apply(calculate_rolling_avg_7d)
+        df['rolling_avg_7d'] = avg_result.values
         
         # ratio of current amount to rolling 7-day average
         df['amount_to_avg_ratio'] = df['amount'] / df['rolling_avg_7d']
@@ -217,15 +238,96 @@ class FraudDetectionTraining:
         # Weekend night transactions
         df['weekend_night'] = (df['is_weekend'] & df['is_night']).astype(int)
 
-        # feature selection - updated with new credit card features
+        # ------------------TARGETED FRAUD DETECTION FEATURES--------------------
+        
+        # 1. CARD TESTING DETECTION (Pattern 2: amounts 0.01-4.99, online, verification fails)
+        df['is_very_small'] = (df['amount'] < 1.0).astype(int)
+        df['card_testing_pattern'] = (
+            (df['amount'] < 5.0) &
+            (df.get('entry_mode', '') == 'ONLINE') &
+            ((df.get('cvv_verified', True) == False) | (df.get('zip_verified', True) == False))
+        ).astype(int)
+        
+        # 2. ACCOUNT TAKEOVER DETECTION (Pattern 1: high amounts, high-risk merchants, online, high-risk countries)
+        df['takeover_pattern'] = (
+            (df['amount'] >= 500) &
+            (df['merchant_risk'] == 1) &
+            (df.get('entry_mode', '') == 'ONLINE') &
+            (df['high_risk_country'] == 1) &
+            (df.get('cvv_verified', True) == False)
+        ).astype(int)
+        
+        # 3. MERCHANT COLLUSION DETECTION (Pattern 3: high amounts, high-risk merchants, physical entry)
+        df['collusion_pattern'] = (
+            (df['amount'] >= 1000) &
+            (df['merchant_risk'] == 1) &
+            (df.get('entry_mode', '').isin(['CHIP', 'SWIPE'])) &
+            (df.get('cvv_verified', True))  # Appears legitimate
+        ).astype(int)
+        
+        # 4. GEOGRAPHIC ANOMALY DETECTION (Pattern 4: high-risk countries, online, address fails)
+        df['geo_anomaly_pattern'] = (
+            (df['high_risk_country'] == 1) &
+            (df.get('entry_mode', '') == 'ONLINE') &
+            (df.get('address_verified', True) == False)
+        ).astype(int)
+        
+        # 5. EXPIRED CARD DETECTION (Pattern 5: expired cards, manual entry, CVV fails)
+        df['expired_card_pattern'] = (
+            (df['is_card_expired'] == 1) &
+            (df.get('entry_mode', '') == 'MANUAL') &
+            (df.get('cvv_verified', True) == False)
+        ).astype(int)
+        
+        # 6. VERIFICATION FAILURE DETECTION (Pattern 6: all verifications fail, online)
+        df['verification_fail_pattern'] = (
+            (df.get('cvv_verified', True) == False) &
+            (df.get('zip_verified', True) == False) &
+            (df.get('address_verified', True) == False) &
+            (df.get('entry_mode', '') == 'ONLINE')
+        ).astype(int)
+        
+        # 7. VELOCITY FEATURES (useful for detecting rapid fraud attempts)
+        # Transaction count in last 1 hour using proper rolling window
+        def calculate_txn_count_1h(group):
+            if len(group) == 0:
+                return pd.Series([], dtype=int)
+            group_sorted = group.sort_values('timestamp')
+            group_indexed = group_sorted.set_index('timestamp')
+            rolling_count = group_indexed['amount'].rolling('1H', closed='left').count().fillna(0)
+            # Reindex to match original group order
+            result = rolling_count.reindex(group['timestamp']).fillna(0)
+            return result
+            
+        # Apply the function and flatten the result
+        velocity_result = df.groupby('user_id', group_keys=False).apply(calculate_txn_count_1h)
+        df['txn_count_1h'] = velocity_result.values.astype(int)
+        df['high_velocity'] = (df['txn_count_1h'] > 3).astype(int)  # >3 txns in 1 hour
+        
+        # 8. AMOUNT ANOMALY FEATURES
+        df['user_amount_std'] = df.groupby('user_id')['amount'].transform('std').fillna(0)
+        df['amount_z_score'] = abs((df['amount'] - df['rolling_avg_7d']) / (df['user_amount_std'] + 0.01))
+        df['amount_outlier'] = (df['amount_z_score'] > 2.5).astype(int)  # 2.5 standard deviations
+        
+        # 9. NON-USD CURRENCY (higher fraud risk based on producer currencies)
+        df['non_usd_currency'] = (df.get('currency', 'USD') != 'USD').astype(int)
+
+        # feature selection - streamlined to most relevant features
         features_col = [
-            'amount', 'is_night', 'is_weekend', 'transaction_day', 
-            'transaction_hour', 'time_since_last_transaction',
-            'user_activity_24h', 'rolling_avg_7d', 'amount_to_avg_ratio', 
-            'merchant_risk', 'merchant', 'verification_score',
-            'high_risk_category', 'high_risk_entry_mode', 'is_card_expired',
-            'high_risk_country', 'high_risk_transaction_type',
-            'is_micro_transaction', 'is_large_transaction', 'weekend_night'
+            # Basic temporal and monetary features
+            'amount', 'is_night', 'is_weekend', 'transaction_day', 'transaction_hour', 
+            'time_since_last_transaction', 'user_activity_24h', 'rolling_avg_7d', 
+            'amount_to_avg_ratio', 'merchant_risk', 'merchant',
+            
+            # Credit card verification and risk features
+            'verification_score', 'high_risk_category', 'high_risk_entry_mode', 
+            'is_card_expired', 'high_risk_country', 'high_risk_transaction_type',
+            'is_micro_transaction', 'is_large_transaction', 'weekend_night',
+            
+            # Targeted fraud pattern detection features
+            'is_very_small', 'card_testing_pattern', 'takeover_pattern', 
+            'collusion_pattern', 'geo_anomaly_pattern', 'expired_card_pattern',
+            'verification_fail_pattern', 'high_velocity', 'amount_outlier', 'non_usd_currency'
         ]
         
         if 'is_fraud' not in df.columns:
@@ -440,7 +542,7 @@ class FraudDetectionTraining:
                 signature = infer_signature(X_train, Y_pred)
                 
                 # Include framework in model name
-                model_name = f"fraud_detection_{framework}_model"
+                model_name = f"fraud_detection_{framework}_model_v2"
                 
                 mlflow.sklearn.log_model(
                     sk_model=best_model,
@@ -453,7 +555,7 @@ class FraudDetectionTraining:
                 mlflow.log_param('framework', framework)
 
                 os.makedirs('model', exist_ok=True)
-                joblib.dump(best_model, '/app/models/fraud_detection_model.pkl')
+                joblib.dump(best_model, '/app/models/fraud_detection_model_v2.pkl')
 
                 logger.info(f'Training successfully completed with metrics {metrics}')
 

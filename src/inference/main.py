@@ -147,17 +147,9 @@ class FraudDetectionInference:
         df = df.withColumn('is_night', when((col('transaction_hour') < 5) | (col('transaction_hour') >= 22), 1).otherwise(0))
         df = df.withColumn('transaction_day', dayofweek(col('timestamp')))
         
-        # time-based features 
-        # Calculate time since last transaction using lag over user_id partition
-        from pyspark.sql.window import Window
-        from pyspark.sql.functions import lag, unix_timestamp
-        
-        user_window = Window.partitionBy("user_id").orderBy("timestamp")
-        df = df.withColumn("prev_timestamp", lag("timestamp").over(user_window))
-        df = df.withColumn("time_since_last_transaction", 
-                          when(col("prev_timestamp").isNull(), 0.0)
-                          .otherwise(unix_timestamp("timestamp") - unix_timestamp("prev_timestamp")))
-        df = df.drop("prev_timestamp")
+        # time-based features (streaming-safe placeholder)
+        # NOTE: Proper calculation requires stateful processing, not supported in streaming DataFrames
+        df = df.withColumn("time_since_last_transaction", lit(0.0))
         
         # behavioral features - REQUIRES STATEFUL STREAMING
         # user_activity_24h needs: sliding 24h window + state management across batches
@@ -210,7 +202,70 @@ class FraudDetectionInference:
         df = df.withColumn("is_large_transaction", when(col("amount") > 1000.0, 1).otherwise(0))
         
         # Weekend night transactions (higher risk)
-        df = df.withColumn("weekend_night", (col("is_weekend") & col("is_night")).cast("int"))
+        df = df.withColumn(
+            "weekend_night",
+            ((col("is_weekend").cast("boolean")) & (col("is_night").cast("boolean"))).cast("int")
+        )
+
+        # ------------------TARGETED FRAUD DETECTION FEATURES--------------------
+        
+        # 1. CARD TESTING DETECTION (Pattern 2: amounts 0.01-4.99, online, verification fails)
+        df = df.withColumn("is_very_small", when(col("amount") < 1.0, 1).otherwise(0))
+        df = df.withColumn("card_testing_pattern", 
+                          when((col("amount") < 5.0) &
+                               (col("entry_mode") == "ONLINE") &
+                               ((col("cvv_verified") == False) | (col("zip_verified") == False)), 1).otherwise(0))
+        
+        # 2. ACCOUNT TAKEOVER DETECTION (Pattern 1: high amounts, high-risk merchants, online, high-risk countries)
+        df = df.withColumn("takeover_pattern",
+                          when((col("amount") >= 500) &
+                               (col("merchant_risk") == 1) &
+                               (col("entry_mode") == "ONLINE") &
+                               (col("high_risk_country") == 1) &
+                               (col("cvv_verified") == False), 1).otherwise(0))
+        
+        # 3. MERCHANT COLLUSION DETECTION (Pattern 3: high amounts, high-risk merchants, physical entry)
+        df = df.withColumn("collusion_pattern",
+                          when((col("amount") >= 1000) &
+                               (col("merchant_risk") == 1) &
+                               (col("entry_mode").isin(["CHIP", "SWIPE"])) &
+                               (col("cvv_verified")), 1).otherwise(0))
+        
+        # 4. GEOGRAPHIC ANOMALY DETECTION (Pattern 4: high-risk countries, online, address fails)
+        df = df.withColumn("geo_anomaly_pattern",
+                          when((col("high_risk_country") == 1) &
+                               (col("entry_mode") == "ONLINE") &
+                               (col("address_verified") == False), 1).otherwise(0))
+        
+        # 5. EXPIRED CARD DETECTION (Pattern 5: expired cards, manual entry, CVV fails)
+        df = df.withColumn("expired_card_pattern",
+                          when((col("is_card_expired") == 1) &
+                               (col("entry_mode") == "MANUAL") &
+                               (col("cvv_verified") == False), 1).otherwise(0))
+        
+        # 6. VERIFICATION FAILURE DETECTION (Pattern 6: all verifications fail, online)
+        df = df.withColumn("verification_fail_pattern",
+                          when((col("cvv_verified") == False) &
+                               (col("zip_verified") == False) &
+                               (col("address_verified") == False) &
+                               (col("entry_mode") == "ONLINE"), 1).otherwise(0))
+        
+        # 7. VELOCITY FEATURES (useful for detecting rapid fraud attempts)
+        # NOTE: For streaming, this is simplified. In production, would need stateful processing
+        # For now, using a simplified version that doesn't require state management
+        df = df.withColumn("txn_count_1h", lit(1))  # simplified: assume single transaction
+        df = df.withColumn("high_velocity", when(col("txn_count_1h") > 3, 1).otherwise(0))
+        
+        # 8. AMOUNT ANOMALY FEATURES
+        # NOTE: For streaming, this is simplified. In production, would need user history
+        df = df.withColumn("user_amount_std", lit(50.0))  # simplified: use average std
+        df = df.withColumn("amount_z_score", 
+                          when(col("user_amount_std") > 0, 
+                               (col("amount") - col("rolling_avg_7d")) / (col("user_amount_std") + 0.01)).otherwise(0))
+        df = df.withColumn("amount_outlier", when(col("amount_z_score") > 2.5, 1).otherwise(0))
+        
+        # 9. NON-USD CURRENCY (higher fraud risk based on producer currencies)
+        df = df.withColumn("non_usd_currency", when(col("currency") != "USD", 1).otherwise(0))
 
         df.printSchema()
         return df
@@ -245,7 +300,17 @@ class FraudDetectionInference:
             high_risk_transaction_type: pd.Series,
             is_micro_transaction: pd.Series,
             is_large_transaction: pd.Series,
-            weekend_night: pd.Series
+            weekend_night: pd.Series,
+            is_very_small: pd.Series,
+            card_testing_pattern: pd.Series,
+            takeover_pattern: pd.Series,
+            collusion_pattern: pd.Series,
+            geo_anomaly_pattern: pd.Series,
+            expired_card_pattern: pd.Series,
+            verification_fail_pattern: pd.Series,
+            high_velocity: pd.Series,
+            amount_outlier: pd.Series,
+            non_usd_currency: pd.Series
         ) -> pd.Series:
             input_df = pd.DataFrame({
                 'amount': amount,
@@ -267,7 +332,17 @@ class FraudDetectionInference:
                 'high_risk_transaction_type': high_risk_transaction_type,
                 'is_micro_transaction': is_micro_transaction,
                 'is_large_transaction': is_large_transaction,
-                'weekend_night': weekend_night
+                'weekend_night': weekend_night,
+                'is_very_small': is_very_small,
+                'card_testing_pattern': card_testing_pattern,
+                'takeover_pattern': takeover_pattern,
+                'collusion_pattern': collusion_pattern,
+                'geo_anomaly_pattern': geo_anomaly_pattern,
+                'expired_card_pattern': expired_card_pattern,
+                'verification_fail_pattern': verification_fail_pattern,
+                'high_velocity': high_velocity,
+                'amount_outlier': amount_outlier,
+                'non_usd_currency': non_usd_currency
             })
 
             # get probabilities of the fruad cases
@@ -284,7 +359,10 @@ class FraudDetectionInference:
                 "merchant_risk", "merchant", "verification_score",
                 "high_risk_category", "high_risk_entry_mode", "is_card_expired",
                 "high_risk_country", "high_risk_transaction_type",
-                "is_micro_transaction", "is_large_transaction", "weekend_night"
+                "is_micro_transaction", "is_large_transaction", "weekend_night",
+                "is_very_small", "card_testing_pattern", "takeover_pattern",
+                "collusion_pattern", "geo_anomaly_pattern", "expired_card_pattern",
+                "verification_fail_pattern", "high_velocity", "amount_outlier", "non_usd_currency"
             ]]
         ))
 
@@ -296,7 +374,7 @@ class FraudDetectionInference:
                                     .writeStream
                                     .format("kafka")
                                     .option("kafka.bootstrap.servers", self.bootstrap_servers)
-                                    .option("topic",'fraud_predictions')
+                                    .option("topic",'fraud_predictions_v2')
                                     .option("kafka.security.protocol", self.security_protocol)
                                     .option("kafka.sasl.mechanism", self.sasl_mechanism)
                                     .option("kafka.sasl.jaas.config", self.sasl_jaas_config)
