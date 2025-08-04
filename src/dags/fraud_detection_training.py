@@ -142,6 +142,7 @@ class FraudDetectionTraining:
 
     def _create_features(self, df: pd.DataFrame) -> pd.DataFrame:
         df = df.sort_values(['user_id', 'timestamp']).copy()
+        
         # ------------------extract temporal features-----------------
         # hour of the day
         df['transaction_hour'] = df['timestamp'].dt.hour
@@ -152,23 +153,80 @@ class FraudDetectionTraining:
         # txn day
         df['transaction_day'] = df['timestamp'].dt.day
 
-        #-------------------behavioural features-----------------
+        # ------------------time-based features-----------------
+        # time since last transaction for each user (in seconds)
+        df['time_since_last_transaction'] = df.groupby('user_id')['timestamp'].diff().dt.total_seconds().fillna(0)
+
+        # ------------------behavioural features-----------------
+        # user activity in last 24 hours (rolling count)
         df['user_activity_24h'] = df.groupby('user_id', group_keys=False).apply(
             lambda x: x.rolling('24h', on='timestamp', closed='left')['amount'].count().fillna(0)
-        )
+        ).astype(int)
 
-        #-------------------monetary features--------------------
-        df['amount_to_avg_ratio'] = df.groupby('user_id', group_keys=False).apply(
-            lambda x: x['amount'] / x['amount'].rolling(7, min_periods=1).mean().fillna(1.0)
+        # ------------------monetary features--------------------
+        # rolling 7-day average amount per user
+        df['rolling_avg_7d'] = df.groupby('user_id', group_keys=False).apply(
+            lambda x: x['amount'].rolling('7d', on='timestamp', min_periods=1).mean().fillna(1.0)
         )
-        #-------------------merchant features--------------------
-        high_risk_merchants = self.config.get('high_risk_merchants', ['QuickCash', 'GlobalDigital', 'FastMoneyX'])
+        
+        # ratio of current amount to rolling 7-day average
+        df['amount_to_avg_ratio'] = df['amount'] / df['rolling_avg_7d']
+        df['amount_to_avg_ratio'] = df['amount_to_avg_ratio'].fillna(1.0)
+
+        # ------------------merchant features--------------------
+        high_risk_merchants = self.config.get('high_risk_merchants', ['QuickCash', 'GlobalDigital', 'FastMoneyX', 'CryptoATM', 'OnlineGaming'])
         df['merchant_risk'] = df['merchant'].isin(high_risk_merchants).astype(int)
 
-        # feature selection
-        features_col = ['amount', 'is_night', 'is_weekend',
-                        'transaction_day', 'user_activity_24h',
-                        'amount_to_avg_ratio', 'merchant_risk','merchant']
+        # ------------------credit card specific features--------------------
+        # Card verification score (0-3 based on cvv, zip, address verification)
+        df['verification_score'] = (
+            df.get('cvv_verified', False).astype(int) + 
+            df.get('zip_verified', False).astype(int) + 
+            df.get('address_verified', False).astype(int)
+        )
+        
+        # High-risk merchant categories
+        high_risk_categories = [6011, 5967, 7995]  # ATM, Online, Gambling
+        df['high_risk_category'] = df.get('merchant_category_code', 0).isin(high_risk_categories).astype(int)
+        
+        # Entry mode risk
+        high_risk_entry_modes = ['MANUAL', 'ONLINE']
+        df['high_risk_entry_mode'] = df.get('entry_mode', '').isin(high_risk_entry_modes).astype(int)
+        
+        # Card expiration check
+        current_year = pd.Timestamp.now().year
+        current_month = pd.Timestamp.now().month
+        df['is_card_expired'] = (
+            (df.get('card_exp_year', current_year + 1) < current_year) | 
+            ((df.get('card_exp_year', current_year + 1) == current_year) & 
+             (df.get('card_exp_month', current_month + 1) < current_month))
+        ).astype(int)
+        
+        # High-risk countries
+        high_risk_countries = ['RU', 'CN', 'NG', 'PK', 'IR']
+        df['high_risk_country'] = df.get('location', '').isin(high_risk_countries).astype(int)
+        
+        # Transaction type risk
+        high_risk_transaction_types = ['ATM_WITHDRAWAL', 'CASH_ADVANCE']
+        df['high_risk_transaction_type'] = df.get('transaction_type', '').isin(high_risk_transaction_types).astype(int)
+        
+        # Amount category features
+        df['is_micro_transaction'] = (df['amount'] < 5.0).astype(int)
+        df['is_large_transaction'] = (df['amount'] > 1000.0).astype(int)
+        
+        # Weekend night transactions
+        df['weekend_night'] = (df['is_weekend'] & df['is_night']).astype(int)
+
+        # feature selection - updated with new credit card features
+        features_col = [
+            'amount', 'is_night', 'is_weekend', 'transaction_day', 
+            'transaction_hour', 'time_since_last_transaction',
+            'user_activity_24h', 'rolling_avg_7d', 'amount_to_avg_ratio', 
+            'merchant_risk', 'merchant', 'verification_score',
+            'high_risk_category', 'high_risk_entry_mode', 'is_card_expired',
+            'high_risk_country', 'high_risk_transaction_type',
+            'is_micro_transaction', 'is_large_transaction', 'weekend_night'
+        ]
         
         if 'is_fraud' not in df.columns:
             raise ValueError('is_fraud label is missing from the data')
@@ -279,11 +337,12 @@ class FraudDetectionTraining:
                 })
 
                 # column transformer for preprocessing
+                categorical_features = ['merchant']
                 preprocessor = ColumnTransformer(
                     [
-                        ('merchant_encoder',OrdinalEncoder(
+                        ('merchant_encoder', OrdinalEncoder(
                             handle_unknown='use_encoded_value', unknown_value=-1, dtype=np.float32
-                        ), ['merchant'])
+                        ), categorical_features)
                     ], 
                     remainder='passthrough'
                 )

@@ -3,8 +3,8 @@ from pyspark.sql import SparkSession
 from dotenv import load_dotenv
 import yaml
 import joblib
-from pyspark.sql.types import StructType, StructField, StringType, IntegerType, FloatType, TimestampType
-from pyspark.sql.functions import from_json, col, hour, dayofweek, when, lit, pandas_udf, coalesce, PandasUDFType
+from pyspark.sql.types import StructType, StructField, StringType, IntegerType, FloatType, TimestampType, BooleanType
+from pyspark.sql.functions import from_json, col, hour, dayofweek, when, lit, pandas_udf, coalesce, PandasUDFType, year, month, current_date
 import pandas as pd
 
 import logging
@@ -109,11 +109,29 @@ class FraudDetectionInference:
         json_schema = StructType([
             StructField("transaction_id", StringType(), True),
             StructField("user_id", IntegerType(), True),
+            StructField("card_id", StringType(), True),
             StructField("amount", FloatType(), True),
             StructField("currency", StringType(), True),
             StructField("merchant", StringType(), True),
+            StructField("merchant_category", StringType(), True),
+            StructField("merchant_category_code", IntegerType(), True),
+            StructField("terminal_id", StringType(), True),
+            StructField("transaction_type", StringType(), True),
+            StructField("entry_mode", StringType(), True),
             StructField("timestamp", TimestampType(), True),
             StructField("location", StringType(), True),
+            StructField("lat", FloatType(), True),
+            StructField("long", FloatType(), True),
+            StructField("device_id", StringType(), True),
+            StructField("ip_address", StringType(), True),
+            StructField("user_agent", StringType(), True),
+            StructField("card_type", StringType(), True),
+            StructField("card_brand", StringType(), True),
+            StructField("card_exp_month", IntegerType(), True),
+            StructField("card_exp_year", IntegerType(), True),
+            StructField("cvv_verified", BooleanType(), True),
+            StructField("zip_verified", BooleanType(), True),
+            StructField("address_verified", BooleanType(), True),
         ])
 
         parsed_df = df.selectExpr("CAST(value AS STRING)") \
@@ -123,18 +141,76 @@ class FraudDetectionInference:
     
 
     def add_features(self, df):
+        # temporal features
         df = df.withColumn('transaction_hour', hour(col('timestamp')))
-        df = df.withColumn('is_weekend',when((dayofweek(col('timestamp')) == 1) | (dayofweek(col('timestamp')) == 7), 1).otherwise(0))
-        df = df.withColumn('is_night',when((col('transaction_hour') < 5) | (col('transaction_hour') >= 22), 1).otherwise(0))
+        df = df.withColumn('is_weekend', when((dayofweek(col('timestamp')) == 1) | (dayofweek(col('timestamp')) == 7), 1).otherwise(0))
+        df = df.withColumn('is_night', when((col('transaction_hour') < 5) | (col('transaction_hour') >= 22), 1).otherwise(0))
         df = df.withColumn('transaction_day', dayofweek(col('timestamp')))
-        df = df.withColumn('time_since_last_transaction',lit(0.0))
-        df = df.withColumn("user_activity_24h", lit(1000))
-        df = df.withColumn("rolling_avg_7d", lit(1000.0))
-        df = df.withColumn('merchant_risk',lit(0.0))
+        
+        # time-based features 
+        # Calculate time since last transaction using lag over user_id partition
+        from pyspark.sql.window import Window
+        from pyspark.sql.functions import lag, unix_timestamp
+        
+        user_window = Window.partitionBy("user_id").orderBy("timestamp")
+        df = df.withColumn("prev_timestamp", lag("timestamp").over(user_window))
+        df = df.withColumn("time_since_last_transaction", 
+                          when(col("prev_timestamp").isNull(), 0.0)
+                          .otherwise(unix_timestamp("timestamp") - unix_timestamp("prev_timestamp")))
+        df = df.drop("prev_timestamp")
+        
+        # behavioral features - REQUIRES STATEFUL STREAMING
+        # user_activity_24h needs: sliding 24h window + state management across batches
+        # Implementation would require: Spark state stores with TTL or external cache (Redis)
+        df = df.withColumn("user_activity_24h", lit(1))  # simplified: assume minimal activity
+        
+        # monetary features - REQUIRES STATEFUL STREAMING  
+        # rolling_avg_7d needs: 7-day transaction history + persistent state across micro-batches
+        # Implementation would require: external state store (Cassandra/Redis) or Spark state management
+        df = df.withColumn("rolling_avg_7d", lit(100.0))  # simplified: use global average
         df = df.withColumn("amount_to_avg_ratio", col("amount") / col("rolling_avg_7d"))
         df = df.withColumn("amount_to_avg_ratio", coalesce(col("amount_to_avg_ratio"), lit(1.0)))
-        high_risk_merchants = self.config.get('high_risk_merchants', ['QuickCash', 'GlobalDigital', 'FastMoneyX'])
+        
+        # merchant features
+        high_risk_merchants = self.config.get('high_risk_merchants', ['QuickCash', 'GlobalDigital', 'FastMoneyX', 'CryptoATM', 'OnlineGaming'])
         df = df.withColumn("merchant_risk", col("merchant").isin(high_risk_merchants).cast("int"))
+        
+        # Credit card specific features
+        # Card verification features
+        df = df.withColumn("verification_score", 
+                          (col("cvv_verified").cast("int") + 
+                           col("zip_verified").cast("int") + 
+                           col("address_verified").cast("int")))
+        
+        # High-risk merchant categories (ATM, Online, etc.)
+        high_risk_categories = [6011, 5967, 7995]  # ATM, Online, Gambling
+        df = df.withColumn("high_risk_category", col("merchant_category_code").isin(high_risk_categories).cast("int"))
+        
+        # Entry mode risk (manual/online higher risk)
+        high_risk_entry_modes = ['MANUAL', 'ONLINE']
+        df = df.withColumn("high_risk_entry_mode", col("entry_mode").isin(high_risk_entry_modes).cast("int"))
+        
+        # Card expiration check (expired cards are high risk)
+        from pyspark.sql.functions import year, month, current_date
+        df = df.withColumn("is_card_expired", 
+                          when((col("card_exp_year") < year(current_date())) | 
+                               ((col("card_exp_year") == year(current_date())) & 
+                                (col("card_exp_month") < month(current_date()))), 1).otherwise(0))
+        
+        # High-risk countries
+        high_risk_countries = ['RU', 'CN', 'NG', 'PK', 'IR']
+        df = df.withColumn("high_risk_country", col("location").isin(high_risk_countries).cast("int"))
+        
+        # Transaction type risk
+        high_risk_transaction_types = ['ATM_WITHDRAWAL', 'CASH_ADVANCE']
+        df = df.withColumn("high_risk_transaction_type", col("transaction_type").isin(high_risk_transaction_types).cast("int"))
+        
+        # Amount category features
+        df = df.withColumn("is_micro_transaction", when(col("amount") < 5.0, 1).otherwise(0))
+        df = df.withColumn("is_large_transaction", when(col("amount") > 1000.0, 1).otherwise(0))
+        
+        # Weekend night transactions (higher risk)
+        df = df.withColumn("weekend_night", (col("is_weekend") & col("is_night")).cast("int"))
 
         df.printSchema()
         return df
@@ -150,32 +226,48 @@ class FraudDetectionInference:
 
         @pandas_udf('int')
         def predict_udf(
-            user_id: pd.Series, 
-            amount: pd.Series, 
-            currency: pd.Series, 
-            transaction_hour: pd.Series,
-            is_weekend: pd.Series,
-            time_since_last_transaction: pd.Series,
-            merchant_risk: pd.Series,
-            amount_to_avg_ratio: pd.Series,
+            amount: pd.Series,
             is_night: pd.Series,
+            is_weekend: pd.Series,
             transaction_day: pd.Series,
+            transaction_hour: pd.Series,
+            time_since_last_transaction: pd.Series,
             user_activity_24h: pd.Series,
-            merchant: pd.Series
+            rolling_avg_7d: pd.Series,
+            amount_to_avg_ratio: pd.Series,
+            merchant_risk: pd.Series,
+            merchant: pd.Series,
+            verification_score: pd.Series,
+            high_risk_category: pd.Series,
+            high_risk_entry_mode: pd.Series,
+            is_card_expired: pd.Series,
+            high_risk_country: pd.Series,
+            high_risk_transaction_type: pd.Series,
+            is_micro_transaction: pd.Series,
+            is_large_transaction: pd.Series,
+            weekend_night: pd.Series
         ) -> pd.Series:
             input_df = pd.DataFrame({
-                'user_id': user_id,
                 'amount': amount,
-                'currency': currency,
-                'transaction_hour': transaction_hour,
-                'is_weekend': is_weekend,
-                'time_since_last_transaction': time_since_last_transaction,
-                'merchant_risk': merchant_risk,
-                'amount_to_avg_ratio': amount_to_avg_ratio,
                 'is_night': is_night,
+                'is_weekend': is_weekend,
                 'transaction_day': transaction_day,
+                'transaction_hour': transaction_hour,
+                'time_since_last_transaction': time_since_last_transaction,
                 'user_activity_24h': user_activity_24h,
-                'merchant': merchant
+                'rolling_avg_7d': rolling_avg_7d,
+                'amount_to_avg_ratio': amount_to_avg_ratio,
+                'merchant_risk': merchant_risk,
+                'merchant': merchant,
+                'verification_score': verification_score,
+                'high_risk_category': high_risk_category,
+                'high_risk_entry_mode': high_risk_entry_mode,
+                'is_card_expired': is_card_expired,
+                'high_risk_country': high_risk_country,
+                'high_risk_transaction_type': high_risk_transaction_type,
+                'is_micro_transaction': is_micro_transaction,
+                'is_large_transaction': is_large_transaction,
+                'weekend_night': weekend_night
             })
 
             # get probabilities of the fruad cases
@@ -186,10 +278,13 @@ class FraudDetectionInference:
 
         prediction_df = df.withColumn('prediction', predict_udf(
             *[col(f) for f in [
-                "user_id", "amount", "currency", "transaction_hour",
-                "is_weekend", "time_since_last_transaction", "merchant_risk",
-                "amount_to_avg_ratio", "is_night", "transaction_day",
-                "user_activity_24h", "merchant"
+                "amount", "is_night", "is_weekend", "transaction_day",
+                "transaction_hour", "time_since_last_transaction", 
+                "user_activity_24h", "rolling_avg_7d", "amount_to_avg_ratio",
+                "merchant_risk", "merchant", "verification_score",
+                "high_risk_category", "high_risk_entry_mode", "is_card_expired",
+                "high_risk_country", "high_risk_transaction_type",
+                "is_micro_transaction", "is_large_transaction", "weekend_night"
             ]]
         ))
 
