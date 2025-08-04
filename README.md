@@ -49,22 +49,12 @@ python -m venv .venv
 source .venv/bin/activate  # Linux/Mac
 # .venv\Scripts\activate   # Windows
 
-# Install dependencies
+# Install dependencies (for each subfolder)
 pip install -r requirements.txt
 ```
 
-### 2. Configure Environment
-```bash
-cd src
 
-# Create environment file
-cp .env.example .env
-
-# Edit .env with your Kafka credentials
-nano .env
-```
-
-### 3. Start Services
+### 2. Start Services
 ```bash
 # Start all services (includes Flower UI)
 docker-compose --profile flower up -d --build
@@ -73,7 +63,7 @@ docker-compose --profile flower up -d --build
 docker-compose up -d --build
 ```
 
-### 4. Access Applications
+### 3. Access Applications
 | Service | URL | Purpose |
 |---------|-----|---------|
 | **Airflow** | http://localhost:8080 | Workflow orchestration & monitoring |
@@ -380,137 +370,6 @@ catboost_params:
 
 ## 🔧 Development & Deployment
 
-### Local Development
-
-1. **Setup Development Environment**:
-```bash
-# Install development dependencies
-pip install -r requirements-dev.txt
-
-# Setup pre-commit hooks
-pre-commit install
-```
-
-2. **Running Tests**:
-```bash
-# Unit tests
-pytest tests/
-
-# Integration tests
-pytest tests/integration/
-
-# Coverage report
-pytest --cov=src tests/
-```
-
-3. **Code Quality**:
-```bash
-# Linting
-flake8 src/
-black src/
-isort src/
-
-# Type checking
-mypy src/
-```
-
-### Production Deployment
-
-#### **Kubernetes Deployment**
-```bash
-# Apply Kubernetes manifests
-kubectl apply -f k8s/
-
-# Monitor deployments
-kubectl get pods -n fraud-detection
-
-# Check logs
-kubectl logs -f deployment/inference-service -n fraud-detection
-```
-
-#### **Docker Swarm**
-```bash
-# Initialize swarm
-docker swarm init
-
-# Deploy stack
-docker stack deploy -c docker-stack.yml fraud-detection
-
-# Scale services
-docker service scale fraud-detection_inference=3
-```
-
-#### **Cloud Deployment Options**
-- **AWS**: EKS + MSK + S3 + RDS
-- **GCP**: GKE + Pub/Sub + Cloud Storage + CloudSQL  
-- **Azure**: AKS + Event Hubs + Blob Storage + Azure SQL
-
-### Monitoring & Observability
-
-#### **Airflow Monitoring**
-- Task success/failure rates
-- DAG execution times
-- Resource utilization
-- Email/Slack alerting on failures
-
-#### **MLflow Tracking**
-- Model performance metrics
-- Experiment comparison
-- Model drift detection
-- A/B testing capabilities
-
-#### **Spark Monitoring**
-- Streaming query progress
-- Kafka lag monitoring
-- Processing latencies
-- Error rates and retries
-
-#### **System Metrics**
-- CPU/Memory utilization
-- Kafka throughput
-- Database connections
-- Storage usage
-
-## 🚨 Troubleshooting
-
-### Common Issues
-
-#### **Kafka Connection Issues**
-```bash
-# Check Kafka connectivity
-docker-compose exec producer kafka-topics --bootstrap-server $KAFKA_BOOTSTRAP_SERVERS --list
-
-# Verify credentials in .env file
-cat .env | grep KAFKA
-```
-
-#### **Memory Issues**
-```bash
-# Increase Docker memory allocation
-# Docker Desktop: Settings > Resources > Memory > 8GB+
-
-# Monitor container memory usage
-docker stats
-```
-
-#### **MLflow Connectivity**
-```bash
-# Check MLflow server logs
-docker-compose logs mlflow-server
-
-# Verify MinIO access
-docker-compose exec mlflow-server aws --endpoint-url http://minio:9000 s3 ls
-```
-
-#### **Airflow DAG Issues**
-```bash
-# Check DAG syntax
-docker-compose exec airflow-webserver airflow dags list
-
-# View detailed logs
-docker-compose exec airflow-webserver airflow logs fraud_detection_training_v2 execute_training 2025-01-01
-```
-
 ### Performance Tuning
 
 #### **Spark Optimization**
@@ -575,10 +434,6 @@ with mlflow.start_run():
     mlflow.sklearn.log_model(model, "model")
 ```
 
-## 🤝 Contributing
-
-We welcome contributions! Please see our [Contributing Guide](CONTRIBUTING.md) for details.
-
 ### Development Workflow
 1. Fork the repository
 2. Create a feature branch (`git checkout -b feature/amazing-feature`)
@@ -606,14 +461,6 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 - **XGBoost/LightGBM/CatBoost** for machine learning
 - **Docker** for containerization
 
-## 📞 Support
-
-- **Documentation**: [Project Wiki](https://github.com/kanewyp/fraud-detection-mlops/wiki)
-- **Issues**: [GitHub Issues](https://github.com/kanewyp/fraud-detection-mlops/issues)
-- **Discussions**: [GitHub Discussions](https://github.com/kanewyp/fraud-detection-mlops/discussions)
-- **Email**: support@yourcompany.com
-
----
 
 ⭐ **Star this repository** if you find it helpful!
 
